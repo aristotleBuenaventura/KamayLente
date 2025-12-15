@@ -2,96 +2,113 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
-export default function Dashboard({ navigation }: any) {
+export default function Dashboard() {
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Dashboard</Text>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.welcome}>Welcome back, Blank! 👋</Text>
+        <Text style={styles.subtitle}>Master basic FSL vocabulary.</Text>
 
-      <View style={styles.cardsContainer}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Total Users</Text>
-          <Text style={styles.cardValue}>1200</Text>
+        <View style={styles.progressCard}>
+          <Text style={styles.progressLabel}>Overall Progress</Text>
+          <Text style={styles.progressPercent}>0%</Text>
+          <Text style={styles.progressModules}>0 of 0 modules completed</Text>
+          <View style={styles.progressBarBackground}>
+            <View style={[styles.progressBarFill, { width: '0%' }]} />
+          </View>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Active Sessions</Text>
-          <Text style={styles.cardValue}>350</Text>
+        <View style={styles.quickStats}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Modules</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Remaining</Text>
+          </View>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Revenue</Text>
-          <Text style={styles.cardValue}>$5,400</Text>
-        </View>
-      </View>
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.primaryButton}>
+            <Text style={styles.primaryButtonText}>Start Learning</Text>
+          </TouchableOpacity>
 
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <Text style={styles.buttonText}>Go to Profile</Text>
+          <TouchableOpacity style={styles.secondaryButton}>
+            <Text style={styles.secondaryButtonText}>View Profile</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.tipCard}>
+          <Text style={styles.tipTitle}>💡 Learning Tip</Text>
+          <Text style={styles.tipText}>
+            Practice for 15 minutes daily to build muscle memory and improve retention of sign language.
+          </Text>
+        </View>
+      </ScrollView>
+
+      {/* Bottom Navigation UI */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Settings')}
-        >
-          <Text style={styles.buttonText}>Settings</Text>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navText}>Learn</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navText}>Profile</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navText}>Settings</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  scrollContent: { padding: 20, paddingBottom: 100, marginTop: 20 }, // added marginTop
+  welcome: { fontSize: 24, fontWeight: 'bold', marginBottom: 4 },
+  subtitle: { fontSize: 14, color: '#6B7280', marginBottom: 20 },
+  progressCard: {
+    backgroundColor: '#ECFEFF',
+    borderRadius: 12,
     padding: 20,
-    backgroundColor: '#f9f9f9',
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
     marginBottom: 20,
   },
-  cardsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 30,
-  },
-  card: {
-    backgroundColor: '#fff',
+  progressLabel: { fontSize: 14, color: '#6B7280' },
+  progressPercent: { fontSize: 28, fontWeight: 'bold', color: '#14B8A6', marginVertical: 5 },
+  progressModules: { fontSize: 12, color: '#6B7280', marginBottom: 10 },
+  progressBarBackground: { height: 8, backgroundColor: '#D1FAE5', borderRadius: 4 },
+  progressBarFill: { height: 8, backgroundColor: '#14B8A6', borderRadius: 4 },
+  quickStats: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
+  statCard: {
+    backgroundColor: '#F0FDF4',
+    flex: 1,
+    marginHorizontal: 5,
     padding: 20,
     borderRadius: 12,
-    width: '30%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  cardTitle: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 5,
-  },
-  cardValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  buttonsContainer: {
-    marginTop: 10,
-  },
-  button: {
-    backgroundColor: '#4e9bde',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginBottom: 15,
     alignItems: 'center',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
+  statNumber: { fontSize: 24, fontWeight: 'bold', color: '#14B8A6' },
+  statLabel: { fontSize: 12, color: '#6B7280', marginTop: 4 },
+  actions: { marginBottom: 20 },
+  primaryButton: { backgroundColor: '#14B8A6', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
+  primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  secondaryButton: { borderColor: '#14B8A6', borderWidth: 1, paddingVertical: 16, borderRadius: 12, alignItems: 'center' },
+  secondaryButtonText: { color: '#14B8A6', fontSize: 16, fontWeight: 'bold' },
+  tipCard: { backgroundColor: '#FEF3C7', padding: 16, borderRadius: 12 },
+  tipTitle: { fontSize: 14, fontWeight: 'bold', marginBottom: 4 },
+  tipText: { fontSize: 12, color: '#78350F' },
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 20,
+    borderTopWidth: 5,
+    borderTopColor: '#E5E7EB',
+    backgroundColor: '#fff',
   },
+  navItem: { alignItems: 'center' },
+  navText: { fontSize: 15, color: '#6B7280' },
 });
