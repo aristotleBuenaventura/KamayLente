@@ -1,11 +1,46 @@
 // screens/ProfileScreen.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen({ navigation }: any) {
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState('John Doe');
-  const [age, setAge] = useState('25');
+  const [name, setName] = useState('');
+  const [age, setAge] = useState('');
+
+  // Load saved data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const savedName = await AsyncStorage.getItem('name');
+        const savedAge = await AsyncStorage.getItem('age');
+        if (savedName) setName(savedName);
+        if (savedAge) setAge(savedAge);
+      } catch (error) {
+        console.log('Error loading data', error);
+      }
+    };
+    loadData();
+  }, []);
+
+  // Save data to AsyncStorage
+  const saveData = async () => {
+    try {
+      await AsyncStorage.setItem('name', name);
+      await AsyncStorage.setItem('age', age);
+      Alert.alert('Success', 'Profile saved successfully!');
+    } catch (error) {
+      console.log('Error saving data', error);
+    }
+  };
+
+  // Toggle edit/save
+  const handleEditSave = () => {
+    if (isEditing) {
+      saveData(); // Save on 'Save'
+    }
+    setIsEditing(!isEditing);
+  };
 
   return (
     <View style={styles.container}>
@@ -50,7 +85,7 @@ export default function ProfileScreen({ navigation }: any) {
         {/* Edit/Save Button */}
         <TouchableOpacity
           style={styles.editButton}
-          onPress={() => setIsEditing(!isEditing)}
+          onPress={handleEditSave}
         >
           <Text style={styles.editButtonText}>{isEditing ? 'Save' : 'Edit'}</Text>
         </TouchableOpacity>

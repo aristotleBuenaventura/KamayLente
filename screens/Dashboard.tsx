@@ -1,12 +1,27 @@
 // screens/Dashboard.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function Dashboard({ navigation }: any) {
+    const [name, setName] = useState('');
+
+      useEffect(() => {
+        const loadName = async () => {
+          try {
+            const savedName = await AsyncStorage.getItem('name');
+            if (savedName) setName(savedName);
+          } catch (error) {
+            console.log('Error loading name:', error);
+          }
+        };
+        loadName();
+      }, []);
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.welcome}>Welcome back, John! 👋</Text>
+        <Text style={styles.welcome}>Welcome{ name ? `, ${name}` : '' }!</Text>
         <Text style={styles.subtitle}>Master basic FSL vocabulary.</Text>
 
         <View style={styles.progressCard}>
