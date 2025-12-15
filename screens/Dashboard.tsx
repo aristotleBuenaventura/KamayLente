@@ -55,7 +55,7 @@ export default function Dashboard({ navigation }: any) {
         <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navText}>Learn</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
