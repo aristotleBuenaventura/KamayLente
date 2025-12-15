@@ -1,33 +1,25 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  SafeAreaView,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: any) { // <-- receive navigation here
   return (
     <SafeAreaView style={styles.container}>
-      {/* Logo Section */}
       <View style={styles.logoContainer}>
         <Image
           source={{ uri: 'https://drive.google.com/uc?export=view&id=1wYTeLUivykHcXunRCLIU2DwNUImMzExZ' }}
           style={styles.logo}
         />
-
       </View>
 
-
-      {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Detect Gesture.</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Dashboard')} // now works
+        >
           <Text style={styles.buttonText}>Learn With Us?</Text>
         </TouchableOpacity>
 
@@ -36,7 +28,6 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>Want to know more about us?</Text>
         <Text style={styles.footerLink}>Click Here</Text>

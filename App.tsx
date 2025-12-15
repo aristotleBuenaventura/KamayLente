@@ -1,20 +1,21 @@
 // App.tsx
 import React from 'react';
-import { SafeAreaView, StyleSheet, StatusBar } from 'react-native';
-import HomeScreen from './screens/HomeScreen'; // make sure HomeScreen.tsx exists
+import { StatusBar } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './screens/HomeScreen';
+import Dashboard from './screens/Dashboard';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <SafeAreaView style={styles.container}>
+    <NavigationContainer>
       <StatusBar barStyle="dark-content" />
-      <HomeScreen />
-    </SafeAreaView>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Dashboard" component={Dashboard} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});
