@@ -14,24 +14,25 @@ export default function HomeScreen() {
       {/* Logo Section */}
       <View style={styles.logoContainer}>
         <Image
-          source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3209/3209265.png' }}
+          source={{ uri: 'https://drive.google.com/uc?export=view&id=1wYTeLUivykHcXunRCLIU2DwNUImMzExZ' }}
           style={styles.logo}
         />
-        <Text style={styles.appName}>KAMAY-LENTE</Text>
+
       </View>
+
 
       {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>📷  Detect Gesture.</Text>
+          <Text style={styles.buttonText}>Detect Gesture.</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>✋  Learn With Us?</Text>
+          <Text style={styles.buttonText}>Learn With Us?</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>❓  Help</Text>
+          <Text style={styles.buttonText}>Help</Text>
         </TouchableOpacity>
       </View>
 
@@ -56,8 +57,8 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logo: {
-    width: 140,
-    height: 140,
+    width: 190,
+    height: 220,
     marginBottom: 12,
   },
   appName: {
@@ -81,8 +82,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '900',
     color: '#111827',
   },
   footer: {
