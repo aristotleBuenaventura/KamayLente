@@ -1,37 +1,65 @@
 // screens/ProfileScreen.tsx
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 
 export default function ProfileScreen({ navigation }: any) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState('John Doe');
+  const [age, setAge] = useState('25');
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>Profile</Text>
 
-      {/* Profile Image */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: 'https://via.placeholder.com/150' }}
-          style={styles.image}
-        />
-      </View>
+        {/* Profile Image */}
+        <TouchableOpacity style={styles.imageContainer} onPress={() => alert('Pick a new profile image')}>
+          <Image
+            source={{ uri: 'https://via.placeholder.com/150' }}
+            style={styles.image}
+          />
+        </TouchableOpacity>
 
-      {/* Name */}
-      <Text style={styles.label}>Name</Text>
-      <Text style={styles.info}>John Doe</Text>
+        {/* Name */}
+        <Text style={styles.label}>Name</Text>
+        {isEditing ? (
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="Enter your name"
+          />
+        ) : (
+          <Text style={styles.info}>{name}</Text>
+        )}
 
-      {/* Age */}
-      <Text style={styles.label}>Age</Text>
-      <Text style={styles.info}>25</Text>
+        {/* Age */}
+        <Text style={styles.label}>Age</Text>
+        {isEditing ? (
+          <TextInput
+            style={styles.input}
+            value={age}
+            onChangeText={setAge}
+            placeholder="Enter your age"
+            keyboardType="numeric"
+          />
+        ) : (
+          <Text style={styles.info}>{age}</Text>
+        )}
 
-      {/* Edit Button */}
-      <TouchableOpacity style={styles.editButton}>
-        <Text style={styles.editButtonText}>Edit</Text>
-      </TouchableOpacity>
+        {/* Edit/Save Button */}
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => setIsEditing(!isEditing)}
+        >
+          <Text style={styles.editButtonText}>{isEditing ? 'Save' : 'Edit'}</Text>
+        </TouchableOpacity>
+      </ScrollView>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.navText}>Home</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Dashboard')}>
+          <Text style={styles.navText}>Dashboard</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navText}>Learn</Text>
@@ -48,34 +76,52 @@ export default function ProfileScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f2f2f2', padding: 20, justifyContent: 'flex-start' },
-  title: { fontSize: 28, fontWeight: 'bold', marginVertical: 20, color: '#333', alignSelf: 'center' },
+  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  scrollContent: { padding: 20, paddingBottom: 120, marginTop: 20 },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#111827', alignSelf: 'center', marginBottom: 20 },
+
   imageContainer: {
     marginVertical: 20,
     borderRadius: 75,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#4a90e2',
+    borderWidth: 3,
+    borderColor: '#FBBF24',
     alignSelf: 'center',
   },
   image: { width: 150, height: 150 },
-  label: { fontSize: 16, color: '#888', marginTop: 10 },
-  info: { fontSize: 20, fontWeight: '500', color: '#333', marginBottom: 10 },
+
+  label: { fontSize: 14, color: '#6B7280', marginTop: 10 },
+  info: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: 10,
+  },
+  input: {
+    backgroundColor: '#E5E7EB',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+    fontSize: 16,
+    color: '#111827',
+    marginBottom: 10,
+  },
+
   editButton: {
     marginTop: 30,
-    backgroundColor: '#4a90e2',
-    paddingVertical: 12,
-    paddingHorizontal: 50,
-    borderRadius: 25,
-    alignSelf: 'center',
+    backgroundColor: '#FBBF24',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
   },
-  editButtonText: { color: '#fff', fontSize: 18, fontWeight: '600' },
+  editButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+
   bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    paddingVertical: 20,
+    borderTopWidth: 5,
+    borderTopColor: '#E5E7EB',
     backgroundColor: '#fff',
     position: 'absolute',
     bottom: 0,

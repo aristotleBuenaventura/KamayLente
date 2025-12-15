@@ -6,7 +6,7 @@ export default function Dashboard({ navigation }: any) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.welcome}>Welcome back, Blank! 👋</Text>
+        <Text style={styles.welcome}>Welcome back, John! 👋</Text>
         <Text style={styles.subtitle}>Master basic FSL vocabulary.</Text>
 
         <View style={styles.progressCard}>
@@ -34,7 +34,7 @@ export default function Dashboard({ navigation }: any) {
             <Text style={styles.primaryButtonText}>Start Learning</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.secondaryButton}>
+          <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Profile')}>
             <Text style={styles.secondaryButtonText}>View Profile</Text>
           </TouchableOpacity>
         </View>
@@ -94,10 +94,10 @@ const styles = StyleSheet.create({
   statNumber: { fontSize: 24, fontWeight: 'bold', color: '#14B8A6' },
   statLabel: { fontSize: 12, color: '#6B7280', marginTop: 4 },
   actions: { marginBottom: 20 },
-  primaryButton: { backgroundColor: '#14B8A6', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
+  primaryButton: { backgroundColor: '#FBBF24', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
   primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  secondaryButton: { borderColor: '#14B8A6', borderWidth: 1, paddingVertical: 16, borderRadius: 12, alignItems: 'center' },
-  secondaryButtonText: { color: '#14B8A6', fontSize: 16, fontWeight: 'bold' },
+  secondaryButton: { borderColor: '#FBBF24', borderWidth: 1, paddingVertical: 16, borderRadius: 12, alignItems: 'center' },
+  secondaryButtonText: { color: '#FBBF24', fontSize: 16, fontWeight: 'bold' },
   tipCard: { backgroundColor: '#FEF3C7', padding: 16, borderRadius: 12 },
   tipTitle: { fontSize: 14, fontWeight: 'bold', marginBottom: 4 },
   tipText: { fontSize: 12, color: '#78350F' },
