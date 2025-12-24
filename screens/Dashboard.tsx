@@ -45,7 +45,7 @@ export default function Dashboard({ navigation }: any) {
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.primaryButton}>
+          <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('Alphabets')}>
             <Text style={styles.primaryButtonText}>Start Learning</Text>
           </TouchableOpacity>
 
