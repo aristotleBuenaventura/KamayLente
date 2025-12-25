@@ -1,25 +1,39 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { ProgressContext } from './ProgressContext';
-import alphabetImage from './Images/A.png'; // example
+import alphabetImage from './Images/A.png';
 import numbersImage from './Images/12.png';
 import BottomNav from './BottomNav';
 
 export default function MyProgressScreen({ navigation }: any) {
   const { progress } = useContext(ProgressContext);
+  const [loading, setLoading] = useState(true);
+
+  // Wait a short moment for AsyncStorage to load
+  useEffect(() => {
+    setLoading(false);
+  }, [progress]);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#F5A623" />
+      </View>
+    );
+  }
 
   const modulesData = [
     {
       title: 'Alphabets',
       description: 'Letters from A to Z.',
-      progressPercent: progress.alphabets,
+      progressPercent: progress.alphabets || 0,
       active: true,
       image: alphabetImage,
     },
     {
       title: 'Numbers',
       description: 'Counting Numbers from 0 to 9.',
-      progressPercent: progress.numbers,
+      progressPercent: progress.numbers || 0,
       active: progress.numbersUnlocked,
       image: numbersImage,
     },
@@ -60,7 +74,6 @@ export default function MyProgressScreen({ navigation }: any) {
         ))}
       </ScrollView>
       <BottomNav navigation={navigation} />
-
     </View>
   );
 }
@@ -68,24 +81,8 @@ export default function MyProgressScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFBEA', // light cream background
+    backgroundColor: '#FFFBEA',
     paddingTop: 50,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#333', // dark text for visibility
-    marginRight: 15,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
   },
   modulesContainer: {
     paddingHorizontal: 20,
@@ -98,7 +95,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   activeModule: {
-    backgroundColor: '#FFF3C4', // slightly darker cream
+    backgroundColor: '#FFF3C4',
   },
   lockedModule: {
     backgroundColor: '#FFF3C4',
@@ -123,10 +120,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginVertical: 4,
   },
-  moduleLesson: {
-    color: '#999',
-    fontSize: 12,
-  },
   progressBarBackground: {
     width: '100%',
     height: 6,
@@ -136,7 +129,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: 6,
-    backgroundColor: '#F5A623', // golden progress fill
+    backgroundColor: '#F5A623',
     borderRadius: 3,
   },
   actionButton: {

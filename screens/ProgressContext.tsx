@@ -1,4 +1,5 @@
-import React, { createContext, useState, ReactNode, useMemo } from 'react';
+import React, { createContext, useState, ReactNode, useEffect, useMemo } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ModuleProgress {
   alphabets: number; // 0 to 1
@@ -24,6 +25,8 @@ export const ProgressContext = createContext<ProgressContextProps>({
   overallProgress: 0,
 });
 
+const STORAGE_KEY = 'progress';
+
 export const ProgressProvider = ({ children }: { children: ReactNode }) => {
   const [progress, setProgress] = useState<ModuleProgress>({
     alphabets: 0,
@@ -32,6 +35,34 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const totalModules = 2;
+
+  // Load saved progress on mount
+  useEffect(() => {
+    const loadProgress = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed: ModuleProgress = JSON.parse(saved);
+          setProgress(parsed);
+        }
+      } catch (err) {
+        console.log('Error loading progress:', err);
+      }
+    };
+    loadProgress();
+  }, []);
+
+  // Save progress whenever it changes
+  useEffect(() => {
+    const saveProgress = async () => {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+      } catch (err) {
+        console.log('Error saving progress:', err);
+      }
+    };
+    saveProgress();
+  }, [progress]);
 
   const completedModules =
     (progress.alphabets >= 1 ? 1 : 0) +

@@ -7,13 +7,7 @@ import { ProgressContext } from './ProgressContext';
 
 export default function Dashboard({ navigation }: any) {
   const [name, setName] = useState('');
-
-  const {
-    overallProgress,
-    completedModules,
-    totalModules,
-  } = useContext(ProgressContext);
-
+  const { overallProgress, completedModules, totalModules } = useContext(ProgressContext);
   const remainingModules = totalModules - completedModules;
 
   useEffect(() => {
@@ -34,7 +28,6 @@ export default function Dashboard({ navigation }: any) {
         <Text style={styles.welcome}>
           Welcome{ name ? `, ${name}` : '' }!
         </Text>
-
         <Text style={styles.subtitle}>
           Master basic FSL vocabulary.
         </Text>
@@ -42,15 +35,10 @@ export default function Dashboard({ navigation }: any) {
         {/* OVERALL PROGRESS */}
         <View style={styles.progressCard}>
           <Text style={styles.progressLabel}>Overall Progress</Text>
-
-          <Text style={styles.progressPercent}>
-            {overallProgress}%
-          </Text>
-
+          <Text style={styles.progressPercent}>{overallProgress}%</Text>
           <Text style={styles.progressModules}>
             {completedModules} of {totalModules} modules completed
           </Text>
-
           <View style={styles.progressBarBackground}>
             <View
               style={[
@@ -67,7 +55,6 @@ export default function Dashboard({ navigation }: any) {
             <Text style={styles.statNumber}>{totalModules}</Text>
             <Text style={styles.statLabel}>Modules</Text>
           </View>
-
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{remainingModules}</Text>
             <Text style={styles.statLabel}>Remaining</Text>
@@ -82,7 +69,6 @@ export default function Dashboard({ navigation }: any) {
           >
             <Text style={styles.primaryButtonText}>Start Learning</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={() => navigation.navigate('Profile')}
@@ -106,23 +92,37 @@ export default function Dashboard({ navigation }: any) {
   );
 }
 
-/* =======================
-   STYLES
-======================= */
+/* ======================= STYLES ======================= */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFBEA' },
-  scrollContent: { padding: 20, paddingBottom: 100, marginTop: 20 },
-
-  welcome: { fontSize: 24, fontWeight: 'bold', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: '#6B7280', marginBottom: 20 },
-
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFBEA',
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100,
+    marginTop: 20,
+  },
+  welcome: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 20,
+  },
   progressCard: {
     backgroundColor: '#ECFEFF',
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
   },
-  progressLabel: { fontSize: 14, color: '#6B7280' },
+  progressLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
   progressPercent: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -144,7 +144,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#14B8A6',
     borderRadius: 4,
   },
-
   quickStats: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -168,8 +167,9 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginTop: 4,
   },
-
-  actions: { marginBottom: 20 },
+  actions: {
+    marginBottom: 20,
+  },
   primaryButton: {
     backgroundColor: '#FBBF24',
     paddingVertical: 16,
@@ -194,7 +194,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-
   tipCard: {
     backgroundColor: '#FEF3C7',
     padding: 16,
