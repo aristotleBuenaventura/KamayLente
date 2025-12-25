@@ -1,40 +1,37 @@
-// ProgressContext.tsx
 import React, { createContext, useState, ReactNode, useMemo } from 'react';
 
 interface ModuleProgress {
   alphabets: number; // 0 to 1
   numbers: number;   // 0 to 1
+  numbersUnlocked: boolean;
 }
 
 interface ProgressContextProps {
   progress: ModuleProgress;
-  numbersUnlocked: boolean;
-  completedModules: number;
-  totalModules: number;
-  overallProgress: number;
   setAlphabetsProgress: (value: number) => void;
   setNumbersProgress: (value: number) => void;
+  totalModules: number;
+  completedModules: number;
+  overallProgress: number; // 0 to 100
 }
 
 export const ProgressContext = createContext<ProgressContextProps>({
-  progress: { alphabets: 0, numbers: 0 },
-  numbersUnlocked: false,
-  completedModules: 0,
-  totalModules: 2,
-  overallProgress: 0,
+  progress: { alphabets: 0, numbers: 0, numbersUnlocked: false },
   setAlphabetsProgress: () => {},
   setNumbersProgress: () => {},
+  totalModules: 2,
+  completedModules: 0,
+  overallProgress: 0,
 });
 
 export const ProgressProvider = ({ children }: { children: ReactNode }) => {
   const [progress, setProgress] = useState<ModuleProgress>({
     alphabets: 0,
     numbers: 0,
+    numbersUnlocked: false,
   });
 
   const totalModules = 2;
-
-  const numbersUnlocked = progress.alphabets >= 1;
 
   const completedModules =
     (progress.alphabets >= 1 ? 1 : 0) +
@@ -45,30 +42,29 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const setAlphabetsProgress = (value: number) => {
+    const clampedValue = Math.min(1, Math.max(0, value));
     setProgress((prev) => ({
       ...prev,
-      alphabets: Math.min(1, Math.max(0, value)),
+      alphabets: clampedValue,
+      numbersUnlocked: clampedValue >= 1,
     }));
   };
 
   const setNumbersProgress = (value: number) => {
-    setProgress((prev) => ({
-      ...prev,
-      numbers: Math.min(1, Math.max(0, value)),
-    }));
+    const clampedValue = Math.min(1, Math.max(0, value));
+    setProgress((prev) => ({ ...prev, numbers: clampedValue }));
   };
 
   const contextValue = useMemo(
     () => ({
       progress,
-      numbersUnlocked,
-      completedModules,
-      totalModules,
-      overallProgress,
       setAlphabetsProgress,
       setNumbersProgress,
+      totalModules,
+      completedModules,
+      overallProgress,
     }),
-    [progress, numbersUnlocked, completedModules, overallProgress]
+    [progress]
   );
 
   return (

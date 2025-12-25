@@ -16,7 +16,10 @@ export default function Alphabet({ navigation }: any) {
   });
 
   const item = alphabetData[index];
-  const currentProgress = (index + 1) / TOTAL_LESSONS;
+
+  // Ensure last lesson sets exact 1.0 progress to unlock Numbers
+  const currentProgress =
+    index === TOTAL_LESSONS - 1 ? 1 : (index + 1) / TOTAL_LESSONS;
 
   // Update global progress when index changes
   useEffect(() => {
