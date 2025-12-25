@@ -11,14 +11,14 @@ export default function MyProgressScreen({ navigation }: any) {
   const modulesData = [
     {
       title: 'Alphabets',
-      description: 'Foundational handshapes.',
+      description: 'Letters from A to Z.',
       progressPercent: progress.alphabets,
       active: true,
       image: alphabetImage,
     },
     {
       title: 'Numbers',
-      description: 'Counting 1-100.',
+      description: 'Counting Numbers from 0 to 9.',
       progressPercent: progress.numbers,
       active: progress.numbersUnlocked,
       image: numbersImage,
