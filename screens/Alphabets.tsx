@@ -96,7 +96,7 @@ export default function Alphabet({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0B1220',
+    backgroundColor: '#FFFBEA',
   },
 
   /* Header */
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    color: '#FFFFFF',
+    color: '#111827',
     fontSize: 22,
     fontWeight: '700',
     marginBottom: 12,
@@ -114,24 +114,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   lessonText: {
-    color: '#9CA3AF',
+    color: '#6B7280',
     fontSize: 14,
   },
   percentText: {
-    color: '#3B82F6',
+    color: '#2563EB',
     fontSize: 14,
     fontWeight: '600',
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#1F2933',
+    backgroundColor: '#E5E7EB',
     borderRadius: 4,
     marginTop: 8,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#2563EB',
   },
 
   /* Content */
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   imageCard: {
-    backgroundColor: '#7DB9B3',
+    backgroundColor: '#D1FAE5',
     borderRadius: 18,
     padding: 20,
     alignItems: 'center',
@@ -152,13 +152,13 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   letterTitle: {
-    color: '#FFFFFF',
+    color: '#111827',
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 8,
   },
   description: {
-    color: '#CBD5E1',
+    color: '#374151',
     fontSize: 16,
     lineHeight: 22,
   },
@@ -172,10 +172,11 @@ const styles = StyleSheet.create({
   },
   prevButton: {
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: '#D1D5DB',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 18,
+    backgroundColor: '#FFFFFF',
   },
   nextButton: {
     backgroundColor: '#2563EB',
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
   },
   prevText: {
-    color: '#E5E7EB',
+    color: '#111827',
     fontSize: 16,
   },
   nextText: {
@@ -202,10 +203,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: '#1F2933',
-    backgroundColor: '#0B1220',
+    borderTopColor: '#E5E7EB',
+    backgroundColor: '#FFFBEA',
   },
   navItem: { alignItems: 'center' },
-  navText: { color: '#9CA3AF', fontSize: 14 },
-  navTextActive: { color: '#3B82F6', fontSize: 14, fontWeight: '600' },
+  navText: { color: '#6B7280', fontSize: 14 },
+  navTextActive: { color: '#2563EB', fontSize: 14, fontWeight: '600' },
 });
+
