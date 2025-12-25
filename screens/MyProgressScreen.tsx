@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { ProgressContext } from './ProgressContext';
-import alphabetImage from './alphabets/Alphabets/A.png'; // example
-import numbersImage from './alphabets/Alphabets/A.png';
+import alphabetImage from './Images/A.png'; // example
+import numbersImage from './Images/12.png';
 import BottomNav from './BottomNav';
 
 export default function MyProgressScreen({ navigation }: any) {

@@ -6,10 +6,14 @@ import BottomNav from './BottomNav';
 
 const TOTAL_LESSONS = 26;
 
-
 export default function Alphabet({ navigation }: any) {
-  const [index, setIndex] = useState(0);
   const { progress, setAlphabetsProgress } = useContext(ProgressContext);
+
+  // Initialize index based on saved progress
+  const [index, setIndex] = useState(() => {
+    const lastLessonIndex = Math.floor(progress.alphabets * TOTAL_LESSONS);
+    return lastLessonIndex < TOTAL_LESSONS ? lastLessonIndex : TOTAL_LESSONS - 1;
+  });
 
   const item = alphabetData[index];
   const currentProgress = (index + 1) / TOTAL_LESSONS;
@@ -62,8 +66,8 @@ export default function Alphabet({ navigation }: any) {
           <Text style={styles.nextText}>Next →</Text>
         </TouchableOpacity>
       </View>
-      <BottomNav navigation={navigation} />
 
+      <BottomNav navigation={navigation} />
     </View>
   );
 }

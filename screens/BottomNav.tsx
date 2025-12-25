@@ -13,7 +13,7 @@ export default function BottomNav({ navigation }: any) {
 
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate('Alphabets')}
+        onPress={() => navigation.navigate('MyProgressScreen')}
       >
         <Text style={styles.navText}>Learn</Text>
       </TouchableOpacity>
