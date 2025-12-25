@@ -1,52 +1,35 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { alphabetData } from './alphabet';
+import { ProgressContext } from './ProgressContext';
 
 const TOTAL_LESSONS = 26;
 
-const BottomNav = ({ navigation }: any) => {
-  return (
-    <View style={styles.bottomNav}>
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-        <Text style={styles.navText}>Home</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Alphabets')}>
-        <Text style={styles.navTextActive}>Learn</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
-        <Text style={styles.navText}>Profile</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navText}>Settings</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
 export default function Alphabet({ navigation }: any) {
   const [index, setIndex] = useState(0);
-  const item = alphabetData[index];
+  const { progress, setAlphabetsProgress } = useContext(ProgressContext);
 
-  const progress = ((index + 1) / TOTAL_LESSONS) * 100;
+  const item = alphabetData[index];
+  const currentProgress = (index + 1) / TOTAL_LESSONS;
+
+  // Update global progress when index changes
+  useEffect(() => {
+    setAlphabetsProgress(currentProgress);
+  }, [index]);
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Alphabets</Text>
-
         <View style={styles.progressRow}>
           <Text style={styles.lessonText}>
             Lesson {index + 1} of {TOTAL_LESSONS}
           </Text>
-          <Text style={styles.percentText}>{Math.round(progress)}%</Text>
+          <Text style={styles.percentText}>{Math.round(currentProgress * 100)}%</Text>
         </View>
-
         <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          <View style={[styles.progressFill, { width: `${currentProgress * 100}%` }]} />
         </View>
       </View>
 
@@ -55,14 +38,8 @@ export default function Alphabet({ navigation }: any) {
         <View style={styles.imageCard}>
           <Image source={item.image} style={styles.image} />
         </View>
-
-        <Text style={styles.letterTitle}>
-          Letter {item.letter}
-        </Text>
-
-        <Text style={styles.description}>
-          {item.text}
-        </Text>
+        <Text style={styles.letterTitle}>Letter {item.letter}</Text>
+        <Text style={styles.description}>{item.text}</Text>
       </View>
 
       {/* Prev / Next */}
@@ -76,19 +53,13 @@ export default function Alphabet({ navigation }: any) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.nextButton,
-            index === alphabetData.length - 1 && styles.disabled,
-          ]}
-          disabled={index === alphabetData.length - 1}
+          style={[styles.nextButton, index === TOTAL_LESSONS - 1 && styles.disabled]}
+          disabled={index === TOTAL_LESSONS - 1}
           onPress={() => setIndex(index + 1)}
         >
           <Text style={styles.nextText}>Next →</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Bottom Nav */}
-      <BottomNav navigation={navigation} />
     </View>
   );
 }
@@ -206,8 +177,16 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
     backgroundColor: '#FFFBEA',
   },
-  navItem: { alignItems: 'center' },
-  navText: { color: '#6B7280', fontSize: 14 },
-  navTextActive: { color: '#2563EB', fontSize: 14, fontWeight: '600' },
+  navItem: {
+    alignItems: 'center',
+  },
+  navText: {
+    color: '#6B7280',
+    fontSize: 14,
+  },
+  navTextActive: {
+    color: '#2563EB',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
-

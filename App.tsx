@@ -8,11 +8,13 @@ import Dashboard from './screens/Dashboard';
 import ProfileScreen from './screens/ProfileScreen';
 import Alphabets from './screens/Alphabets';
 import MyProgressScreen from './screens/MyProgressScreen';
+import { ProgressProvider } from './screens/ProgressContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
+   <ProgressProvider>
     <NavigationContainer>
       <StatusBar barStyle="dark-content" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -21,7 +23,9 @@ export default function App() {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Alphabets" component={Alphabets} />
         <Stack.Screen name="MyProgressScreen" component={MyProgressScreen} />
+        <Stack.Screen name="ProgressProvider" component={ProgressProvider} />
       </Stack.Navigator>
     </NavigationContainer>
+   </ProgressProvider>
   );
 }

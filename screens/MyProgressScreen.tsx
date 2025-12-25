@@ -1,37 +1,31 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-
-const modulesData = [
-  {
-    title: 'Alphabets',
-    description: 'Foundational handshapes.',
-    lessonProgress: '12 of 26',
-    progressPercent: 0.46,
-    active: true,
-    image: require('./alphabets/Alphabets/A.png'),
-  },
-  {
-    title: 'Numbers',
-    description: 'Counting 1-100.',
-    lessonProgress: '0 of 26',
-    progressPercent: 0,
-    active: false,
-    image: require('./alphabets/Alphabets/A.png'),
-  },
-];
+import { ProgressContext } from './ProgressContext';
+import alphabetImage from './alphabets/Alphabets/A.png'; // example
+import numbersImage from './alphabets/Alphabets/A.png';
 
 export default function MyProgressScreen({ navigation }: any) {
+  const { progress } = useContext(ProgressContext);
+
+  const modulesData = [
+    {
+      title: 'Alphabets',
+      description: 'Foundational handshapes.',
+      progressPercent: progress.alphabets,
+      active: true,
+      image: alphabetImage,
+    },
+    {
+      title: 'Numbers',
+      description: 'Counting 1-100.',
+      progressPercent: progress.numbers,
+      active: progress.numbersUnlocked,
+      image: numbersImage,
+    },
+  ];
+
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Progress</Text>
-      </View>
-
-      {/* Modules */}
       <ScrollView contentContainerStyle={styles.modulesContainer}>
         {modulesData.map((module, index) => (
           <View
@@ -45,20 +39,21 @@ export default function MyProgressScreen({ navigation }: any) {
             <View style={styles.moduleTextContainer}>
               <Text style={styles.moduleTitle}>{module.title}</Text>
               <Text style={styles.moduleDescription}>{module.description}</Text>
-              <Text style={styles.moduleLesson}>{module.lessonProgress}</Text>
               <View style={styles.progressBarBackground}>
                 <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: `${module.progressPercent * 100}%` },
-                  ]}
+                  style={[styles.progressBarFill, { width: `${module.progressPercent * 100}%` }]}
                 />
               </View>
             </View>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>
-                {module.active ? '▶' : '🔒'}
-              </Text>
+            <TouchableOpacity
+              style={styles.actionButton}
+              disabled={!module.active}
+              onPress={() =>
+                module.active &&
+                navigation.navigate(module.title === 'Alphabets' ? 'Alphabets' : 'Numbers')
+              }
+            >
+              <Text style={styles.actionButtonText}>{module.active ? '▶' : '🔒'}</Text>
             </TouchableOpacity>
           </View>
         ))}
