@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { alphabetData } from './alphabet'; // your alphabet data
+import { alphabetData } from './alphabet';
+
+const TOTAL_LESSONS = 26;
 
 const BottomNav = ({ navigation }: any) => {
   return (
@@ -10,7 +12,7 @@ const BottomNav = ({ navigation }: any) => {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Alphabets')}>
-        <Text style={styles.navText}>Learn</Text>
+        <Text style={styles.navTextActive}>Learn</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
@@ -24,97 +26,186 @@ const BottomNav = ({ navigation }: any) => {
   );
 };
 
-const Alphabet = ({ navigation }: any) => {
+export default function Alphabet({ navigation }: any) {
   const [index, setIndex] = useState(0);
   const item = alphabetData[index];
 
-  const goPrev = () => {
-    if (index > 0) setIndex(index - 1);
-  };
-
-  const goNext = () => {
-    if (index < alphabetData.length - 1) setIndex(index + 1);
-  };
+  const progress = ((index + 1) / TOTAL_LESSONS) * 100;
 
   return (
     <View style={styles.container}>
-      {/* Main content */}
-      <View style={styles.content}>
-        <Image source={item.image} style={styles.image} />
-        <Text style={styles.text}>
-          {item.letter} - {item.text}
-        </Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Alphabets</Text>
 
-        <View style={styles.arrowContainer}>
-          <TouchableOpacity
-            style={[styles.arrowButton, index === 0 && styles.disabled]}
-            onPress={goPrev}
-            disabled={index === 0}
-          >
-            <Text style={styles.arrowText}>⬅️</Text>
-          </TouchableOpacity>
+        <View style={styles.progressRow}>
+          <Text style={styles.lessonText}>
+            Lesson {index + 1} of {TOTAL_LESSONS}
+          </Text>
+          <Text style={styles.percentText}>{Math.round(progress)}%</Text>
+        </View>
 
-          <TouchableOpacity
-            style={[styles.arrowButton, index === alphabetData.length - 1 && styles.disabled]}
-            onPress={goNext}
-            disabled={index === alphabetData.length - 1}
-          >
-            <Text style={styles.arrowText}>➡️</Text>
-          </TouchableOpacity>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
       </View>
 
-      {/* Bottom navigation */}
+      {/* Content */}
+      <View style={styles.content}>
+        <View style={styles.imageCard}>
+          <Image source={item.image} style={styles.image} />
+        </View>
+
+        <Text style={styles.letterTitle}>Letter A</Text>
+
+        <Text style={styles.description}>
+          This hand sign represents the letter A. Practice forming a closed fist
+          with your thumb resting gently on the side. Keep movements clear and
+          steady while learning.
+        </Text>
+      </View>
+
+      {/* Prev / Next */}
+      <View style={styles.navButtons}>
+        <TouchableOpacity
+          style={[styles.prevButton, index === 0 && styles.disabled]}
+          disabled={index === 0}
+          onPress={() => setIndex(index - 1)}
+        >
+          <Text style={styles.prevText}>← Previous</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.nextButton,
+            index === alphabetData.length - 1 && styles.disabled,
+          ]}
+          disabled={index === alphabetData.length - 1}
+          onPress={() => setIndex(index + 1)}
+        >
+          <Text style={styles.nextText}>Next →</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Bottom Nav */}
       <BottomNav navigation={navigation} />
     </View>
   );
-};
-
-export default Alphabet;
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0B1220',
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+
+  /* Header */
+  header: {
     padding: 20,
   },
-  image: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
+  title: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
   },
-  text: {
-    marginTop: 16,
-    fontSize: 20,
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  lessonText: {
+    color: '#9CA3AF',
+    fontSize: 14,
+  },
+  percentText: {
+    color: '#3B82F6',
+    fontSize: 14,
     fontWeight: '600',
   },
-  arrowContainer: {
+  progressBar: {
+    height: 6,
+    backgroundColor: '#1F2933',
+    borderRadius: 4,
+    marginTop: 8,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#3B82F6',
+  },
+
+  /* Content */
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  imageCard: {
+    backgroundColor: '#7DB9B3',
+    borderRadius: 18,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  image: {
+    width: 220,
+    height: 220,
+    resizeMode: 'contain',
+  },
+  letterTitle: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  description: {
+    color: '#CBD5E1',
+    fontSize: 16,
+    lineHeight: 22,
+  },
+
+  /* Prev / Next */
+  navButtons: {
     flexDirection: 'row',
-    marginTop: 30,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
   },
-  arrowButton: {
-    marginHorizontal: 30,
-    padding: 10,
+  prevButton: {
+    borderWidth: 1,
+    borderColor: '#374151',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
   },
-  arrowText: {
-    fontSize: 32,
+  nextButton: {
+    backgroundColor: '#2563EB',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+  },
+  prevText: {
+    color: '#E5E7EB',
+    fontSize: 16,
+  },
+  nextText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   disabled: {
-    opacity: 0.3,
+    opacity: 0.4,
   },
+
+  /* Bottom Nav */
   bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 20,
+    paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#fff',
+    borderTopColor: '#1F2933',
+    backgroundColor: '#0B1220',
   },
   navItem: { alignItems: 'center' },
-  navText: { fontSize: 15, color: '#6B7280' },
+  navText: { color: '#9CA3AF', fontSize: 14 },
+  navTextActive: { color: '#3B82F6', fontSize: 14, fontWeight: '600' },
 });

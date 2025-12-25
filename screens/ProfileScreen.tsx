@@ -111,7 +111,7 @@ export default function ProfileScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, backgroundColor: '#FFFBEA' },
   scrollContent: { padding: 20, paddingBottom: 120, marginTop: 20 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#111827', alignSelf: 'center', marginBottom: 20 },
 
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderTopWidth: 5,
     borderTopColor: '#E5E7EB',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFBEA',
     position: 'absolute',
     bottom: 0,
     left: 0,

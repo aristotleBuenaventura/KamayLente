@@ -82,7 +82,7 @@ export default function Dashboard({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, backgroundColor: '#FFFBEA' },
   scrollContent: { padding: 20, paddingBottom: 100, marginTop: 20 }, // added marginTop
   welcome: { fontSize: 24, fontWeight: 'bold', marginBottom: 4 },
   subtitle: { fontSize: 14, color: '#6B7280', marginBottom: 20 },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderTopWidth: 5,
     borderTopColor: '#E5E7EB',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFBEA',
   },
   navItem: { alignItems: 'center' },
   navText: { fontSize: 15, color: '#6B7280' },

@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFBEA',
   },
   navItem: { alignItems: 'center' },
   navText: { fontSize: 15, color: '#6B7280' },
