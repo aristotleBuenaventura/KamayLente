@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'rea
 import { ProgressContext } from './ProgressContext';
 import alphabetImage from './alphabets/Alphabets/A.png'; // example
 import numbersImage from './alphabets/Alphabets/A.png';
+import BottomNav from './BottomNav';
 
 export default function MyProgressScreen({ navigation }: any) {
   const { progress } = useContext(ProgressContext);
@@ -58,6 +59,8 @@ export default function MyProgressScreen({ navigation }: any) {
           </View>
         ))}
       </ScrollView>
+      <BottomNav navigation={navigation} />
+
     </View>
   );
 }

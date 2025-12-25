@@ -5,6 +5,28 @@ import { ProgressContext } from './ProgressContext';
 
 const TOTAL_LESSONS = 26;
 
+const BottomNav = ({ navigation }: any) => {
+  return (
+    <View style={styles.bottomNav}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
+        <Text style={styles.navText}>Home</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Alphabets')}>
+        <Text style={styles.navTextActive}>Learn</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
+        <Text style={styles.navText}>Profile</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.navItem}>
+        <Text style={styles.navText}>Settings</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 export default function Alphabet({ navigation }: any) {
   const [index, setIndex] = useState(0);
   const { progress, setAlphabetsProgress } = useContext(ProgressContext);
@@ -60,6 +82,8 @@ export default function Alphabet({ navigation }: any) {
           <Text style={styles.nextText}>Next →</Text>
         </TouchableOpacity>
       </View>
+      <BottomNav navigation={navigation} />
+
     </View>
   );
 }
