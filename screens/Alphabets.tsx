@@ -56,12 +56,12 @@ export default function Alphabet({ navigation }: any) {
           <Image source={item.image} style={styles.image} />
         </View>
 
-        <Text style={styles.letterTitle}>Letter A</Text>
+        <Text style={styles.letterTitle}>
+          Letter {item.letter}
+        </Text>
 
         <Text style={styles.description}>
-          This hand sign represents the letter A. Practice forming a closed fist
-          with your thumb resting gently on the side. Keep movements clear and
-          steady while learning.
+          {item.text}
         </Text>
       </View>
 
