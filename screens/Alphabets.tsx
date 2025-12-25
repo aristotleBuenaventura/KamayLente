@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   percentText: {
-    color: '#2563EB',
+    color: '#FBBF24',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#2563EB',
+    backgroundColor: '#FBBF24',
   },
 
   /* Content */
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   nextButton: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#FBBF24',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 22,
