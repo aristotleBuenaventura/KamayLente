@@ -2,30 +2,10 @@ import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { alphabetData } from './alphabet';
 import { ProgressContext } from './ProgressContext';
+import BottomNav from './BottomNav';
 
 const TOTAL_LESSONS = 26;
 
-const BottomNav = ({ navigation }: any) => {
-  return (
-    <View style={styles.bottomNav}>
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-        <Text style={styles.navText}>Home</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Alphabets')}>
-        <Text style={styles.navTextActive}>Learn</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
-        <Text style={styles.navText}>Profile</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navText}>Settings</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
 
 export default function Alphabet({ navigation }: any) {
   const [index, setIndex] = useState(0);

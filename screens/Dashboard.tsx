@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import BottomNav from './BottomNav';
 
 export default function Dashboard({ navigation }: any) {
     const [name, setName] = useState('');
@@ -63,20 +63,7 @@ export default function Dashboard({ navigation }: any) {
       </ScrollView>
 
       {/* Bottom Navigation UI */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navText}>Learn</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNav navigation={navigation} />
     </View>
   );
 }
@@ -116,14 +103,4 @@ const styles = StyleSheet.create({
   tipCard: { backgroundColor: '#FEF3C7', padding: 16, borderRadius: 12 },
   tipTitle: { fontSize: 14, fontWeight: 'bold', marginBottom: 4 },
   tipText: { fontSize: 12, color: '#78350F' },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
-    borderTopWidth: 5,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFBEA',
-  },
-  navItem: { alignItems: 'center' },
-  navText: { fontSize: 15, color: '#6B7280' },
 });
