@@ -10,6 +10,7 @@ import Alphabets from './screens/Alphabets';
 import Numbers from './screens/Numbers';
 import MyProgressScreen from './screens/MyProgressScreen';
 import { ProgressProvider } from './screens/ProgressContext';
+import QuizScreen from './screens/QuizScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,8 +25,8 @@ export default function App() {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Alphabets" component={Alphabets} />
         <Stack.Screen name="Numbers" component={Numbers} />
+        <Stack.Screen name="QuizScreen" component={QuizScreen} />
         <Stack.Screen name="MyProgressScreen" component={MyProgressScreen} />
-        <Stack.Screen name="ProgressProvider" component={ProgressProvider} />
       </Stack.Navigator>
     </NavigationContainer>
    </ProgressProvider>
