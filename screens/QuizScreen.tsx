@@ -200,7 +200,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFBEA",
     padding: 20,
-    marginTop: 20,
   },
 
   header: {
@@ -208,6 +207,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10,
+    marginTop: 20,
   },
 
   close: {
