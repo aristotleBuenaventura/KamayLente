@@ -22,7 +22,7 @@ export const ProgressContext = createContext<ProgressContextProps>({
 const STORAGE_KEY = 'progress';
 
 // Only your real modules
-const MODULES = ['alphabets', 'numbers'];
+const MODULES = ['alphabets', 'numbers', 'test2'];
 
 export const ProgressProvider = ({ children }: { children: ReactNode }) => {
   const [progress, setProgress] = useState<ProgressMap>({});
