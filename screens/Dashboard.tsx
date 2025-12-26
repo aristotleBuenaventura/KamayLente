@@ -1,13 +1,15 @@
 // screens/Dashboard.tsx
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNav from './BottomNav';
 import { ProgressContext } from './ProgressContext';
 
 export default function Dashboard({ navigation }: any) {
+  const { progress, completedModules, overallProgress } = useContext(ProgressContext);
   const [name, setName] = useState('');
-  const { overallProgress, completedModules, totalModules } = useContext(ProgressContext);
+
+  const totalModules = Object.keys(progress).length;
   const remainingModules = totalModules - completedModules;
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function Dashboard({ navigation }: any) {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.welcome}>
-          Welcome{ name ? `, ${name}` : '' }!
+          Welcome{name ? `, ${name}` : ''}!
         </Text>
         <Text style={styles.subtitle}>
           Master basic FSL vocabulary.
@@ -86,7 +88,6 @@ export default function Dashboard({ navigation }: any) {
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
       <BottomNav navigation={navigation} />
     </View>
   );
