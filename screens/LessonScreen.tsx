@@ -1,66 +1,71 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { alphabetData } from './alphabet';
 import { ProgressContext } from './ProgressContext';
 import BottomNav from './BottomNav';
 
-const TOTAL_LESSONS = 26;
-const STORAGE_KEY = 'alphabetsProgress';
+export default function LessonScreen({ route, navigation }: any) {
+  const { module } = route.params;
 
-export default function Alphabet({ navigation }: any) {
-  const { progress, setAlphabetsProgress } = useContext(ProgressContext);
+  const { updateProgress } = useContext(ProgressContext);
 
-  // Initialize index from saved progress or context
+  const data = module.data;
+  const TOTAL_LESSONS = data.length;
+  const STORAGE_KEY = `${module.id}_progress_index`;
+
   const [index, setIndex] = useState(0);
 
+  /** Load saved index */
   useEffect(() => {
-    const loadProgress = async () => {
+    const loadIndex = async () => {
       try {
-        const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        let savedProgress = saved ? parseFloat(saved) : progress.alphabets;
-        const lastLessonIndex = Math.floor(savedProgress * TOTAL_LESSONS);
-        setIndex(lastLessonIndex < TOTAL_LESSONS ? lastLessonIndex : TOTAL_LESSONS - 1);
-        setAlphabetsProgress(savedProgress);
+        const savedIndex = await AsyncStorage.getItem(STORAGE_KEY);
+        if (savedIndex !== null) {
+          setIndex(Number(savedIndex));
+        }
       } catch (err) {
-        console.log('Error loading saved progress:', err);
+        console.log('Error loading progress:', err);
       }
     };
-    loadProgress();
+    loadIndex();
   }, []);
 
-  const item = alphabetData[index];
+  const item = data[index];
 
-  // Ensure last lesson sets exact 1.0 progress to unlock Numbers
   const currentProgress =
     index === TOTAL_LESSONS - 1 ? 1 : (index + 1) / TOTAL_LESSONS;
 
-  // Update global context and save to AsyncStorage whenever progress changes
+  /** Save progress */
   useEffect(() => {
-    setAlphabetsProgress(currentProgress);
-    const saveProgress = async () => {
-      try {
-        await AsyncStorage.setItem(STORAGE_KEY, currentProgress.toString());
-      } catch (err) {
-        console.log('Error saving progress:', err);
-      }
-    };
-    saveProgress();
+    updateProgress(module.id, currentProgress);
+
+    AsyncStorage.setItem(STORAGE_KEY, index.toString()).catch((err) =>
+      console.log('Error saving progress:', err)
+    );
   }, [index]);
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, styles.boxContainer]}>
-        <Text style={styles.title}>Alphabets</Text>
+        <Text style={styles.title}>{module.title}</Text>
+
         <View style={styles.progressRow}>
           <Text style={styles.lessonText}>
             Lesson {index + 1} of {TOTAL_LESSONS}
           </Text>
-          <Text style={styles.percentText}>{Math.round(currentProgress * 100)}%</Text>
+          <Text style={styles.percentText}>
+            {Math.round(currentProgress * 100)}%
+          </Text>
         </View>
+
         <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${currentProgress * 100}%` }]} />
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${currentProgress * 100}%` },
+            ]}
+          />
         </View>
       </View>
 
@@ -69,11 +74,16 @@ export default function Alphabet({ navigation }: any) {
         <View style={styles.imageCard}>
           <Image source={item.image} style={styles.image} />
         </View>
-        <Text style={styles.letterTitle}>Letter {item.letter}</Text>
+
+        <Text style={styles.letterTitle}>
+          {item.letter && `Letter ${item.letter}`}
+          {item.number && `Number ${item.number}`}
+        </Text>
+
         <Text style={styles.description}>{item.text}</Text>
       </View>
 
-      {/* Prev / Next */}
+      {/* Navigation */}
       <View style={styles.navButtons}>
         <TouchableOpacity
           style={[styles.prevButton, index === 0 && styles.disabled]}
@@ -84,7 +94,10 @@ export default function Alphabet({ navigation }: any) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.nextButton, index === TOTAL_LESSONS - 1 && styles.disabled]}
+          style={[
+            styles.nextButton,
+            index === TOTAL_LESSONS - 1 && styles.disabled,
+          ]}
           disabled={index === TOTAL_LESSONS - 1}
           onPress={() => setIndex(index + 1)}
         >
@@ -217,4 +230,3 @@ boxContainer:{
     opacity: 0.4,
   },
 });
-

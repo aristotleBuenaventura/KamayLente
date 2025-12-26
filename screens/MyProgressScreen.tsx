@@ -1,78 +1,73 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useContext } from 'react';
+import {LearningModule} from './LearningModule';
+
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+} from 'react-native';
 import { ProgressContext } from './ProgressContext';
-import alphabetImage from './Images/A.png';
-import numbersImage from './Images/12.png';
 import BottomNav from './BottomNav';
 
 export default function MyProgressScreen({ navigation }: any) {
   const { progress } = useContext(ProgressContext);
-  const [loading, setLoading] = useState(true);
-
-  // Wait a short moment for AsyncStorage to load
-  useEffect(() => {
-    setLoading(false);
-  }, [progress]);
-
-  if (loading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#F5A623" />
-      </View>
-    );
-  }
-
-  const modulesData = [
-    {
-      title: 'Alphabets',
-      description: 'Letters from A to Z.',
-      progressPercent: progress.alphabets || 0,
-      active: true,
-      image: alphabetImage,
-    },
-    {
-      title: 'Numbers',
-      description: 'Counting Numbers from 0 to 9.',
-      progressPercent: progress.numbers || 0,
-      active: progress.numbersUnlocked,
-      image: numbersImage,
-    },
-  ];
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.modulesContainer}>
-        {modulesData.map((module, index) => (
-          <View
-            key={index}
-            style={[
-              styles.moduleCard,
-              module.active ? styles.activeModule : styles.lockedModule,
-            ]}
-          >
-            <Image source={module.image} style={styles.moduleImage} />
-            <View style={styles.moduleTextContainer}>
-              <Text style={styles.moduleTitle}>{module.title}</Text>
-              <Text style={styles.moduleDescription}>{module.description}</Text>
-              <View style={styles.progressBarBackground}>
-                <View
-                  style={[styles.progressBarFill, { width: `${module.progressPercent * 100}%` }]}
-                />
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.actionButton}
-              disabled={!module.active}
-              onPress={() =>
-                module.active &&
-                navigation.navigate(module.title === 'Alphabets' ? 'Alphabets' : 'Numbers')
-              }
+        {LearningModule.map((module) => {
+          const progressValue = progress[module.id] || 0;
+
+          const unlocked =
+            !module.unlockAfter ||
+            (progress[module.unlockAfter] || 0) >= 1;
+
+          return (
+            <View
+              key={module.id}
+              style={[
+                styles.moduleCard,
+                unlocked ? styles.activeModule : styles.lockedModule,
+              ]}
             >
-              <Text style={styles.actionButtonText}>{module.active ? '▶' : '🔒'}</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+              <Image source={module.image} style={styles.moduleImage} />
+
+              <View style={styles.moduleTextContainer}>
+                <Text style={styles.moduleTitle}>{module.title}</Text>
+                <Text style={styles.moduleDescription}>
+                  {module.description}
+                </Text>
+
+                <View style={styles.progressBarBackground}>
+                  <View
+                    style={[
+                      styles.progressBarFill,
+                      { width: `${progressValue * 100}%` },
+                    ]}
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={styles.actionButton}
+                disabled={!unlocked}
+                onPress={() =>
+                  unlocked &&
+                  navigation.navigate('Lesson', { module })
+                }
+              >
+                <Text style={styles.actionButtonText}>
+                  {unlocked ? '▶' : '🔒'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })}
       </ScrollView>
+
       <BottomNav navigation={navigation} />
     </View>
   );
@@ -143,3 +138,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
+
