@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,14 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
+const QUESTION_LIMIT = 10;
+
 export default function QuizScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const quiz = route.params?.quiz;
 
+  const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
@@ -20,16 +23,28 @@ export default function QuizScreen() {
   const [streak, setStreak] = useState(0);
   const [finished, setFinished] = useState(false);
 
-  if (!quiz || !quiz.questions) {
+  /* =========================
+     🎲 RANDOMIZE QUESTIONS
+  ========================= */
+  useEffect(() => {
+    if (quiz?.questions) {
+      const shuffled = [...quiz.questions]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, QUESTION_LIMIT);
+
+      setQuizQuestions(shuffled);
+    }
+  }, [quiz]);
+
+  if (!quizQuestions.length) {
     return (
       <View style={styles.container}>
-        <Text>Quiz data missing</Text>
+        <Text>Loading quiz...</Text>
       </View>
     );
   }
 
-  const question = quiz.questions[index];
-
+  const question = quizQuestions[index];
   const isCorrect = selected === question.correctChoiceId;
 
   const onCheck = () => {
@@ -46,7 +61,7 @@ export default function QuizScreen() {
     setChecked(false);
     setSelected(null);
 
-    if (index < quiz.questions.length - 1) {
+    if (index < quizQuestions.length - 1) {
       setIndex(index + 1);
     } else {
       setFinished(true);
@@ -54,6 +69,11 @@ export default function QuizScreen() {
   };
 
   const onRetry = () => {
+    const reshuffled = [...quiz.questions]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, QUESTION_LIMIT);
+
+    setQuizQuestions(reshuffled);
     setIndex(0);
     setSelected(null);
     setChecked(false);
@@ -66,7 +86,7 @@ export default function QuizScreen() {
      🎉 END SCREEN
   ========================= */
   if (finished) {
-    const perfect = score === quiz.questions.length;
+    const perfect = score === quizQuestions.length;
 
     return (
       <View style={[styles.container, styles.results]}>
@@ -75,7 +95,7 @@ export default function QuizScreen() {
         </Text>
 
         <Text style={styles.resultText}>
-          Your Score: {score} / {quiz.questions.length}
+          Your Score: {score} / {quizQuestions.length}
         </Text>
 
         {perfect && (
@@ -84,10 +104,7 @@ export default function QuizScreen() {
           </Text>
         )}
 
-        <TouchableOpacity
-          style={styles.checkButton}
-          onPress={onRetry}
-        >
+        <TouchableOpacity style={styles.checkButton} onPress={onRetry}>
           <Text style={styles.checkButtonText}>
             {perfect ? "Play Again" : "Try Again"}
           </Text>
@@ -108,13 +125,11 @@ export default function QuizScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('Dashboard')}
+          onPress={() => navigation.navigate("Dashboard")}
           style={styles.closeButton}
-          activeOpacity={0.7}
         >
           <Text style={styles.closeText}>✕</Text>
         </TouchableOpacity>
-
 
         <View style={styles.streak}>
           <Text style={styles.streakText}>🔥 {streak}</Text>
@@ -123,40 +138,32 @@ export default function QuizScreen() {
 
       {/* Progress */}
       <Text style={styles.progressText}>
-        QUESTION {index + 1} OF {quiz.questions.length}
+        QUESTION {index + 1} OF {quizQuestions.length}
       </Text>
 
       <View style={styles.progressBarBg}>
         <View
           style={[
             styles.progressBarFill,
-            {
-              width: `${((index + 1) / quiz.questions.length) * 100}%`,
-            },
+            { width: `${((index + 1) / quizQuestions.length) * 100}%` },
           ]}
         />
       </View>
 
-      {/* Question */}
       <Text style={styles.questionText}>
         What does this sign mean?
       </Text>
 
       {/* Image */}
       <View style={styles.imageCard}>
-        {question.image && (
-          <Image source={question.image} style={styles.image} />
-        )}
+        <Image source={question.image} style={styles.image} />
       </View>
 
       {/* Choices */}
       {question.choices.map((c: any, i: number) => {
         const letter = String.fromCharCode(65 + i);
-
-        const correct =
-          checked && c.id === question.correctChoiceId;
-        const wrong =
-          checked && selected === c.id && !correct;
+        const correct = checked && c.id === question.correctChoiceId;
+        const wrong = checked && selected === c.id && !correct;
 
         return (
           <TouchableOpacity
@@ -178,12 +185,8 @@ export default function QuizScreen() {
         );
       })}
 
-      {/* Button */}
       <TouchableOpacity
-        style={[
-          styles.checkButton,
-          !selected && { opacity: 0.5 },
-        ]}
+        style={[styles.checkButton, !selected && { opacity: 0.5 }]}
         disabled={!selected}
         onPress={checked ? onNext : onCheck}
       >
@@ -194,6 +197,7 @@ export default function QuizScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
