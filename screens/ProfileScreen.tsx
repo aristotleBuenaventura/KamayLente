@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomNav from './BottomNav';
 
 export default function ProfileScreen({ navigation }: any) {
   const [isEditing, setIsEditing] = useState(false);
@@ -92,20 +93,7 @@ export default function ProfileScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Dashboard')}>
-          <Text style={styles.navText}>Dashboard</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navText}>Learn</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNav navigation={navigation} />
     </View>
   );
 }
@@ -151,18 +139,4 @@ const styles = StyleSheet.create({
   },
   editButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
 
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
-    borderTopWidth: 5,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFBEA',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  navItem: { alignItems: 'center' },
-  navText: { fontSize: 15, color: '#6B7280' },
 });

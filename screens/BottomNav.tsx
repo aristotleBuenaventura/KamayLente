@@ -13,20 +13,20 @@ export default function BottomNav({ navigation }: any) {
 
       <TouchableOpacity
         style={styles.navItem}
+        onPress={() => navigation.navigate('Dashboard')}
+      >
+        <Text style={styles.navText}>Dashboard</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.navItem}
         onPress={() => navigation.navigate('MyProgressScreen')}
       >
         <Text style={styles.navText}>Learn</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.navItem}
-        onPress={() => navigation.navigate('Profile')}
-      >
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
         <Text style={styles.navText}>Profile</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navText}>Settings</Text>
       </TouchableOpacity>
     </View>
   );
