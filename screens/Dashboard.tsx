@@ -73,9 +73,9 @@ export default function Dashboard({ navigation }: any) {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={() => navigation.navigate('Profile')}
+            onPress={() => navigation.navigate('QuizProgressScreen')}
           >
-            <Text style={styles.secondaryButtonText}>View Profile</Text>
+            <Text style={styles.secondaryButtonText}>Take the Challenge</Text>
           </TouchableOpacity>
         </View>
 
