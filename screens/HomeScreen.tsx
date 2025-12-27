@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { alphabetQuiz } from "./alphabetQuiz";
+import { numberQuiz } from "./numberQuiz";
 
 export default function HomeScreen({ navigation }: any) { // <-- receive navigation here
   return (
@@ -27,7 +28,7 @@ export default function HomeScreen({ navigation }: any) { // <-- receive navigat
         <TouchableOpacity
           style={styles.button}
           onPress={() =>
-              navigation.navigate("QuizScreen", { quiz: alphabetQuiz })}>
+              navigation.navigate("QuizScreen", { quiz: numberQuiz })}>
           <Text style={styles.buttonText}>Help</Text>
         </TouchableOpacity>
       </View>
