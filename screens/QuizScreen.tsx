@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+// screens/QuizScreen.tsx
+import React, { useEffect, useState, useContext } from "react";
 import {
   View,
   Text,
@@ -7,13 +8,17 @@ import {
   Image,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import { QuizProgressContext } from "./QuizProgressContext";
 
 const QUESTION_LIMIT = 10;
+const PASSING_SCORE = 0.7; // 70%
 
 export default function QuizScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const quiz = route.params?.quiz;
+
+  const { setQuizProgress } = useContext(QuizProgressContext);
 
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
   const [index, setIndex] = useState(0);
@@ -65,6 +70,10 @@ export default function QuizScreen() {
       setIndex(index + 1);
     } else {
       setFinished(true);
+
+      // Save score in QuizProgressContext
+      const finalScore = score / quizQuestions.length;
+      setQuizProgress(quiz.id, finalScore);
     }
   };
 
@@ -86,27 +95,28 @@ export default function QuizScreen() {
      🎉 END SCREEN
   ========================= */
   if (finished) {
-    const perfect = score === quizQuestions.length;
+    const finalScore = score / quizQuestions.length;
+    const passed = finalScore >= PASSING_SCORE;
 
     return (
       <View style={[styles.container, styles.results]}>
         <Text style={styles.resultTitle}>
-          {perfect ? "🎉 Congratulations!" : "😅 Try Again"}
+          {passed ? "🎉 Congratulations!" : "😅 Try Again"}
         </Text>
 
         <Text style={styles.resultText}>
-          Your Score: {score} / {quizQuestions.length}
+          Your Score: {score} / {quizQuestions.length} ({Math.round(finalScore * 100)}%)
         </Text>
 
-        {perfect && (
+        {passed && (
           <Text style={styles.perfectText}>
-            Perfect Score! Amazing job 👏
+            You passed! 🎯
           </Text>
         )}
 
         <TouchableOpacity style={styles.checkButton} onPress={onRetry}>
           <Text style={styles.checkButtonText}>
-            {perfect ? "Play Again" : "Try Again"}
+            {passed ? "Play Again" : "Try Again"}
           </Text>
         </TouchableOpacity>
 
@@ -198,173 +208,31 @@ export default function QuizScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFBEA",
-    padding: 20,
-  },
-
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-    marginTop: 20,
-  },
-
-  close: {
-    fontSize: 24,
-    color: "#333",
-  },
-
-  streak: {
-    backgroundColor: "#FFE7C2",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-
-  streakText: {
-    fontWeight: "700",
-  },
-
-  progressText: {
-    fontSize: 12,
-    color: "#777",
-    marginBottom: 6,
-  },
-
-  progressBarBg: {
-    height: 6,
-    backgroundColor: "#E6E6E6",
-    borderRadius: 3,
-    marginBottom: 20,
-  },
-
-  progressBarFill: {
-    height: 6,
-    backgroundColor: "#FFC107",
-    borderRadius: 3,
-  },
-
-  questionText: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 16,
-  },
-
-  imageCard: {
-    backgroundColor: "#F3C9A9",
-    borderRadius: 16,
-    padding: 20,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-
-  image: {
-    width: 200,
-    height: 200,
-    resizeMode: "contain",
-  },
-
-  choice: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#EEE",
-  },
-
-  choiceSelected: {
-    borderColor: "#FFC107",
-  },
-
-  choiceLetter: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: "#F2F2F2",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-
-  choiceLetterText: {
-    fontWeight: "700",
-  },
-
-  choiceText: {
-    fontSize: 16,
-  },
-
-  correct: {
-    backgroundColor: "#E8F5E9",
-    borderColor: "#4CAF50",
-  },
-
-  wrong: {
-    backgroundColor: "#FDECEA",
-    borderColor: "#F44336",
-  },
-
-  checkButton: {
-    backgroundColor: "#FFC107",
-    padding: 16,
-    borderRadius: 16,
-    alignItems: "center",
-    marginTop: 10,
-  },
-
-  checkButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-
-    results: {
-      flex: 1,
-      justifyContent: 'center', // vertical center
-      alignItems: 'center',     // horizontal center
-    },
-
-    resultTitle: {
-      fontSize: 28,
-      fontWeight: '800',
-      textAlign: 'center',
-      marginBottom: 10,
-    },
-
-
-
-  resultText: {
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-
-  perfectText: {
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#4CAF50",
-    fontWeight: "700",
-  },
-
-  exitText: {
-    textAlign: "center",
-    marginTop: 14,
-    color: "#777",
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-  },
-  closeText: {
-    color: '#000000',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  container: { flex: 1, backgroundColor: "#FFFBEA", padding: 20 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10, marginTop: 20 },
+  closeButton: { width: 40, height: 40 },
+  closeText: { color: '#000', fontSize: 18, fontWeight: 'bold' },
+  streak: { backgroundColor: "#FFE7C2", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  streakText: { fontWeight: "700" },
+  progressText: { fontSize: 12, color: "#777", marginBottom: 6 },
+  progressBarBg: { height: 6, backgroundColor: "#E6E6E6", borderRadius: 3, marginBottom: 20 },
+  progressBarFill: { height: 6, backgroundColor: "#FFC107", borderRadius: 3 },
+  questionText: { fontSize: 22, fontWeight: "700", marginBottom: 16 },
+  imageCard: { backgroundColor: "#F3C9A9", borderRadius: 16, padding: 20, alignItems: "center", marginBottom: 20 },
+  image: { width: 200, height: 200, resizeMode: "contain" },
+  choice: { flexDirection: "row", alignItems: "center", backgroundColor: "#FFFFFF", padding: 14, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: "#EEE" },
+  choiceSelected: { borderColor: "#FFC107" },
+  choiceLetter: { width: 32, height: 32, borderRadius: 8, backgroundColor: "#F2F2F2", alignItems: "center", justifyContent: "center", marginRight: 12 },
+  choiceLetterText: { fontWeight: "700" },
+  choiceText: { fontSize: 16 },
+  correct: { backgroundColor: "#E8F5E9", borderColor: "#4CAF50" },
+  wrong: { backgroundColor: "#FDECEA", borderColor: "#F44336" },
+  checkButton: { backgroundColor: "#FFC107", padding: 16, borderRadius: 16, alignItems: "center", marginTop: 10 },
+  checkButtonText: { fontSize: 16, fontWeight: "700" },
+  results: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  resultTitle: { fontSize: 28, fontWeight: '800', textAlign: 'center', marginBottom: 10 },
+  resultText: { fontSize: 18, textAlign: "center", marginBottom: 10 },
+  perfectText: { textAlign: "center", marginBottom: 20, color: "#4CAF50", fontWeight: "700" },
+  exitText: { textAlign: "center", marginTop: 14, color: "#777" },
 });

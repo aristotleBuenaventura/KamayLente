@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { QuizProgressContext } from './QuizProgressContext';
 import BottomNav from './BottomNav';
-import { QuizModule } from './QuizModule'; // use the structured module array
+import { QuizModule } from './QuizModule'; // structured quiz array
 
 export default function QuizProgressScreen({ navigation }: any) {
   const { quizProgress } = useContext(QuizProgressContext);
@@ -21,8 +21,9 @@ export default function QuizProgressScreen({ navigation }: any) {
         <Text style={styles.sectionTitle}>Quizzes</Text>
 
         {QuizModule.map((quiz) => {
-          const progressValue = quizProgress[quiz.id] || 0;
-          const unlocked = !quiz.unlockAfter || (quizProgress[quiz.unlockAfter] || 0) >= 1;
+          const score = quizProgress[quiz.id]?.score || 0;
+          const passed = score >= 0.7; // 70% passing score
+          const unlocked = !quiz.unlockAfter || (quizProgress[quiz.unlockAfter]?.score || 0) >= 0.7;
 
           return (
             <View
@@ -32,14 +33,15 @@ export default function QuizProgressScreen({ navigation }: any) {
               <Image source={quiz.image} style={styles.moduleImage} />
               <View style={styles.moduleTextContainer}>
                 <Text style={styles.moduleTitle}>{quiz.title}</Text>
-                <Text style={styles.moduleDescription}>{quiz.description}</Text>
-
-                <View style={styles.progressBarBackground}>
-                  <View
-                    style={[styles.progressBarFill, { width: `${progressValue * 100}%` }]}
-                  />
-                </View>
-                <Text style={styles.progressPercent}>{Math.round(progressValue * 100)}%</Text>
+                {quiz.description && (
+                  <Text style={styles.moduleDescription}>{quiz.description}</Text>
+                )}
+                <Text style={styles.scoreText}>Score: {Math.round(score * 100)}%</Text>
+                {!unlocked && (
+                  <Text style={styles.lockedText}>
+                    Complete previous quiz to unlock
+                  </Text>
+                )}
               </View>
 
               <TouchableOpacity
@@ -107,21 +109,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginVertical: 4,
   },
-  progressBarBackground: {
-    width: '100%',
-    height: 6,
-    backgroundColor: '#E0D7A7',
-    borderRadius: 3,
+  scoreText: {
+    fontSize: 14,
+    color: '#666',
     marginTop: 5,
   },
-  progressBarFill: {
-    height: 6,
-    backgroundColor: '#F5A623',
-    borderRadius: 3,
-  },
-  progressPercent: {
+  lockedText: {
     fontSize: 12,
-    color: '#666',
+    color: '#999',
     marginTop: 2,
   },
   actionButton: {
