@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { QuizProgressContext } from './QuizProgressContext';
 import BottomNav from './BottomNav';
-import { QuizModule } from './QuizModule'; // structured quiz array
+import { QuizModule } from './QuizModule';
 
 export default function QuizProgressScreen({ navigation }: any) {
   const { quizProgress } = useContext(QuizProgressContext);
@@ -22,7 +22,8 @@ export default function QuizProgressScreen({ navigation }: any) {
 
         {QuizModule.map((quiz) => {
           const score = quizProgress[quiz.id]?.score || 0;
-          const passed = score >= 0.7; // 70% passing score
+          const passed = score >= 0.7;
+          const attempts = quizProgress[quiz.id]?.attempts || 0;
           const unlocked = !quiz.unlockAfter || (quizProgress[quiz.unlockAfter]?.score || 0) >= 0.7;
 
           return (
@@ -36,7 +37,9 @@ export default function QuizProgressScreen({ navigation }: any) {
                 {quiz.description && (
                   <Text style={styles.moduleDescription}>{quiz.description}</Text>
                 )}
-                <Text style={styles.scoreText}>Score: {Math.round(score * 100)}%</Text>
+                <Text style={styles.scoreText}>
+                  Score: {Math.round(score * 100)}% | Attempts: {attempts}
+                </Text>
                 {!unlocked && (
                   <Text style={styles.lockedText}>
                     Complete previous quiz to unlock
@@ -47,7 +50,7 @@ export default function QuizProgressScreen({ navigation }: any) {
               <TouchableOpacity
                 style={styles.actionButton}
                 disabled={!unlocked}
-                onPress={() => unlocked && navigation.navigate('QuizScreen', { quiz: quiz.data })}
+                onPress={() => unlocked && navigation.navigate('QuizScreen', { quiz })}
               >
                 <Text style={styles.actionButtonText}>{unlocked ? '▶' : '🔒'}</Text>
               </TouchableOpacity>

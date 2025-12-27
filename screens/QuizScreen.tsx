@@ -16,7 +16,7 @@ const PASSING_SCORE = 0.7; // 70%
 export default function QuizScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
-  const quiz = route.params?.quiz;
+  const quiz = route.params?.quiz; // Full quiz object
 
   const { setQuizProgress } = useContext(QuizProgressContext);
 
@@ -29,11 +29,11 @@ export default function QuizScreen() {
   const [finished, setFinished] = useState(false);
 
   /* =========================
-     🎲 RANDOMIZE QUESTIONS
+     🎲 LOAD & RANDOMIZE QUESTIONS
   ========================= */
   useEffect(() => {
-    if (quiz?.questions) {
-      const shuffled = [...quiz.questions]
+    if (quiz?.data?.questions) {
+      const shuffled = [...quiz.data.questions]
         .sort(() => Math.random() - 0.5)
         .slice(0, QUESTION_LIMIT);
 
@@ -78,7 +78,7 @@ export default function QuizScreen() {
   };
 
   const onRetry = () => {
-    const reshuffled = [...quiz.questions]
+    const reshuffled = [...quiz.data.questions]
       .sort(() => Math.random() - 0.5)
       .slice(0, QUESTION_LIMIT);
 
@@ -108,11 +108,7 @@ export default function QuizScreen() {
           Your Score: {score} / {quizQuestions.length} ({Math.round(finalScore * 100)}%)
         </Text>
 
-        {passed && (
-          <Text style={styles.perfectText}>
-            You passed! 🎯
-          </Text>
-        )}
+        {passed && <Text style={styles.perfectText}>You passed! 🎯</Text>}
 
         <TouchableOpacity style={styles.checkButton} onPress={onRetry}>
           <Text style={styles.checkButtonText}>
