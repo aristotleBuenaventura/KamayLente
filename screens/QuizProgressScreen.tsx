@@ -15,6 +15,14 @@ import { QuizModule } from './QuizModule';
 export default function QuizProgressScreen({ navigation }: any) {
   const { quizProgress } = useContext(QuizProgressContext);
 
+  if (!quizProgress) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading progress...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.modulesContainer}>
@@ -22,9 +30,11 @@ export default function QuizProgressScreen({ navigation }: any) {
 
         {QuizModule.map((quiz) => {
           const score = quizProgress[quiz.id]?.score || 0;
-          const passed = score >= 0.7;
+          const passed = score >= 0.7; // passing threshold
           const attempts = quizProgress[quiz.id]?.attempts || 0;
-          const unlocked = !quiz.unlockAfter || (quizProgress[quiz.unlockAfter]?.score || 0) >= 0.1;
+          const lastTaken = quizProgress[quiz.id]?.lastTaken;
+          const unlocked =
+            !quiz.unlockAfter || (quizProgress[quiz.unlockAfter]?.score || 0) >= 0.1;
 
           return (
             <View
@@ -40,6 +50,11 @@ export default function QuizProgressScreen({ navigation }: any) {
                 <Text style={styles.scoreText}>
                   Score: {Math.round(score * 100)}% | Attempts: {attempts}
                 </Text>
+                {lastTaken && (
+                  <Text style={styles.lastTakenText}>
+                    Last Taken: {new Date(lastTaken).toLocaleDateString()}
+                  </Text>
+                )}
                 {!unlocked && (
                   <Text style={styles.lockedText}>
                     Complete previous quiz to unlock
@@ -116,6 +131,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 5,
+  },
+  lastTakenText: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
   },
   lockedText: {
     fontSize: 12,

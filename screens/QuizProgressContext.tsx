@@ -1,10 +1,11 @@
 // QuizProgressContext.tsx
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type QuizProgressItem = {
-  score: number; // 0–1
-  attempts?: number; // optional, how many times taken
-  lastTaken?: string; // optional, timestamp
+  score: number;       // 0–1
+  attempts?: number;   // how many times taken
+  lastTaken?: string;  // timestamp
 };
 
 type QuizProgress = {
@@ -21,20 +22,41 @@ export const QuizProgressContext = createContext<QuizProgressContextType>({
   setQuizProgress: () => {},
 });
 
+const STORAGE_KEY = "QUIZ_PROGRESS";
+
 export const QuizProgressProvider = ({ children }: any) => {
   const [quizProgress, setQuizProgressState] = useState<QuizProgress>({});
 
-  const setQuizProgress = (quizId: string, score: number) => {
+  // Load progress from AsyncStorage on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const json = await AsyncStorage.getItem(STORAGE_KEY);
+        if (json) {
+          setQuizProgressState(JSON.parse(json));
+        }
+      } catch (err) {
+        console.log("Failed to load quiz progress:", err);
+      }
+    })();
+  }, []);
+
+  const setQuizProgress = async (quizId: string, score: number) => {
     setQuizProgressState((prev) => {
       const prevItem = prev[quizId] || { score: 0, attempts: 0 };
-      return {
-        ...prev,
-        [quizId]: {
-          score,
-          attempts: prevItem.attempts! + 1,
-          lastTaken: new Date().toISOString(),
-        },
+      const newItem: QuizProgressItem = {
+        score,
+        attempts: (prevItem.attempts || 0) + 1,
+        lastTaken: new Date().toISOString(),
       };
+      const updated = { ...prev, [quizId]: newItem };
+
+      // Save to AsyncStorage
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch((err) =>
+        console.log("Failed to save quiz progress:", err)
+      );
+
+      return updated;
     });
   };
 
