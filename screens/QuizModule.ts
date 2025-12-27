@@ -19,6 +19,6 @@ title: 'Numbers Quiz',
 description: 'Test your knowledge of 0-9 signs.',
 data: numberQuiz,
 image: numberImage,
-unlockAfter: 'numbers', // optional dependency
+unlockAfter: 'alphabetQuiz', // optional dependency
 },
 ];
