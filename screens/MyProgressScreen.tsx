@@ -18,6 +18,7 @@ export default function MyProgressScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.modulesContainer}>
+        <Text style={styles.sectionTitle}>Lessons</Text>
         {LearningModule.map((module) => {
           const progressValue = progress[module.id] || 0;
 
@@ -79,6 +80,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFBEA',
     paddingTop: 50,
   },
+    sectionTitle: {
+        fontSize: 22,
+        fontWeight: '700',
+        marginVertical: 10,
+      },
   modulesContainer: {
     paddingHorizontal: 20,
   },
