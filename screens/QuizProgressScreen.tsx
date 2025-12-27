@@ -24,7 +24,7 @@ export default function QuizProgressScreen({ navigation }: any) {
           const score = quizProgress[quiz.id]?.score || 0;
           const passed = score >= 0.7;
           const attempts = quizProgress[quiz.id]?.attempts || 0;
-          const unlocked = !quiz.unlockAfter || (quizProgress[quiz.unlockAfter]?.score || 0) >= 0.7;
+          const unlocked = !quiz.unlockAfter || (quizProgress[quiz.unlockAfter]?.score || 0) >= 0.1;
 
           return (
             <View

@@ -11,7 +11,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { QuizProgressContext } from "./QuizProgressContext";
 
 const QUESTION_LIMIT = 10;
-const PASSING_SCORE = 0.7; // 70%
+const PASSING_SCORE = 0.1; // 70%
 
 export default function QuizScreen() {
   const route = useRoute<any>();
