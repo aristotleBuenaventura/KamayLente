@@ -94,15 +94,21 @@ export default function LessonScreen({ route, navigation }: any) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.nextButton,
-            index === TOTAL_LESSONS - 1 && styles.disabled,
-          ]}
-          disabled={index === TOTAL_LESSONS - 1}
-          onPress={() => setIndex(index + 1)}
+          style={styles.nextButton}
+          onPress={() => {
+            if (index === TOTAL_LESSONS - 1) {
+              navigation.navigate('MyProgressScreen', { module });
+            } else {
+              setIndex(index + 1);
+            }
+          }}
         >
-          <Text style={styles.nextText}>Next →</Text>
+          <Text style={styles.nextText}>
+            {index === TOTAL_LESSONS - 1 ? 'Done' : 'Next →'}
+          </Text>
         </TouchableOpacity>
+
+
       </View>
 
       <BottomNav navigation={navigation} />

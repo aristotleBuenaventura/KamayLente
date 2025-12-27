@@ -21,12 +21,4 @@ data: numberData,
 image: numbersImage,
 unlockAfter: 'alphabets',
 },
-{
-id: 'test2',
-title: 'test',
-description: 'test.',
-data: numberData,
-image: numbersImage,
-unlockAfter: 'numbers',
-},
 ];
