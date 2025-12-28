@@ -62,7 +62,7 @@ export default function Help({ navigation }: any) {
 
   return (
       <View style={styles.container}>
-    <ScrollView  showsVerticalScrollIndicator={false}>
+    <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       {/* Header Image */}
       <Image
         source={require("./Images/hand.png")}
@@ -165,8 +165,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFBEA",
-    padding: 16,
+
   },
+
+   scrollContainer: {
+       padding: 16,
+       },
 
   headerImage: {
     width: "100%",
