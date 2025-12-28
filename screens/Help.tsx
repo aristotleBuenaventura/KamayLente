@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BottomNav from "./BottomNav";
 import {
   View,
   Text,
@@ -48,7 +49,7 @@ const FAQs: FAQ[] = [
   },
 ];
 
-const Help = () => {
+export default function Help({ navigation }: any) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [viewAll, setViewAll] = useState(false);
 
@@ -60,7 +61,8 @@ const Help = () => {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+    <ScrollView  showsVerticalScrollIndicator={false}>
       {/* Header Image */}
       <Image
         source={require("./Images/hand.png")}
@@ -153,10 +155,11 @@ const Help = () => {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    <BottomNav navigation={navigation} />
+    </View>
   );
 };
 
-export default Help;
 
 const styles = StyleSheet.create({
   container: {
