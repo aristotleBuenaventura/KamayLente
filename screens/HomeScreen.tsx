@@ -35,7 +35,9 @@ export default function HomeScreen({ navigation }: any) { // <-- receive navigat
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Want to know more about us?</Text>
-        <Text style={styles.footerLink}>Click Here</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('AboutUs')}>
+            <Text style={styles.footerLink}>Click Here</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

@@ -13,6 +13,7 @@ import QuizScreen from './screens/QuizScreen';
 import { ProgressProvider } from './screens/ProgressContext';
 import { QuizProgressProvider } from './screens/QuizProgressContext'; // NEW
 import QuizProgressScreen from './screens/QuizProgressScreen';
+import AboutUs from './screens/AboutUs';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +31,7 @@ export default function App() {
             <Stack.Screen name="QuizScreen" component={QuizScreen} />
             <Stack.Screen name="MyProgressScreen" component={MyProgressScreen} />
             <Stack.Screen name="QuizProgressScreen" component={QuizProgressScreen} />
+            <Stack.Screen name="AboutUs" component={AboutUs} />
           </Stack.Navigator>
         </NavigationContainer>
       </QuizProgressProvider>
