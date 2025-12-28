@@ -14,6 +14,7 @@ import { ProgressProvider } from './screens/ProgressContext';
 import { QuizProgressProvider } from './screens/QuizProgressContext'; // NEW
 import QuizProgressScreen from './screens/QuizProgressScreen';
 import AboutUs from './screens/AboutUs';
+import Help from './screens/Help';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,7 @@ export default function App() {
             <Stack.Screen name="MyProgressScreen" component={MyProgressScreen} />
             <Stack.Screen name="QuizProgressScreen" component={QuizProgressScreen} />
             <Stack.Screen name="AboutUs" component={AboutUs} />
+            <Stack.Screen name="Help" component={Help} />
           </Stack.Navigator>
         </NavigationContainer>
       </QuizProgressProvider>

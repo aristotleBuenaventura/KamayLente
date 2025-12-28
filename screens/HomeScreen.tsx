@@ -28,7 +28,7 @@ export default function HomeScreen({ navigation }: any) { // <-- receive navigat
         <TouchableOpacity
           style={styles.button}
           onPress={() =>
-              navigation.navigate("QuizScreen", { quiz: numberQuiz })}>
+              navigation.navigate('Help')}>
           <Text style={styles.buttonText}>Help</Text>
         </TouchableOpacity>
       </View>
