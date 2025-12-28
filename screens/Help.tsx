@@ -11,8 +11,6 @@ import {
   UIManager,
 } from "react-native";
 
-
-// Enable animation for Android
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
 }
@@ -69,39 +67,54 @@ const Help = () => {
         style={styles.headerImage}
       />
 
-      {/* What is Kamay-Lente */}
+      {/* Intro */}
       <Text style={styles.title}>What is Kamay-Lente?</Text>
       <Text style={styles.description}>
         Kamay-Lente is a mobile app that detects basic Filipino Sign Language (FSL)
-        gestures in real time using advanced YOLO11 algorithms. It is designed to
-        teach hearing individuals the basics of FSL and bridge communication gaps.
+        gestures in real time using advanced YOLO11 algorithms. It helps bridge
+        communication gaps and makes learning FSL accessible to everyone.
       </Text>
 
       {/* How It Works */}
       <Text style={styles.sectionTitle}>How It Works</Text>
 
       <View style={styles.stepCard}>
-        <Text style={styles.stepTitle}>🚀 Launch the App</Text>
-        <Text style={styles.stepText}>
-          Open Kamay-Lente and grant camera permissions to get started.
-        </Text>
+        <View style={styles.stepIcon}>
+          <Text style={styles.stepEmoji}>🚀</Text>
+        </View>
+        <View style={styles.stepContent}>
+          <Text style={styles.stepTitle}>Launch the App</Text>
+          <Text style={styles.stepText}>
+            Open Kamay-Lente and allow camera access.
+          </Text>
+        </View>
       </View>
 
       <View style={styles.stepCard}>
-        <Text style={styles.stepTitle}>📸 Focus Camera</Text>
-        <Text style={styles.stepText}>
-          Point your camera at a hand making an FSL gesture within the frame.
-        </Text>
+        <View style={styles.stepIcon}>
+          <Text style={styles.stepEmoji}>📸</Text>
+        </View>
+        <View style={styles.stepContent}>
+          <Text style={styles.stepTitle}>Focus the Camera</Text>
+          <Text style={styles.stepText}>
+            Point your camera at a hand making an FSL gesture.
+          </Text>
+        </View>
       </View>
 
       <View style={styles.stepCard}>
-        <Text style={styles.stepTitle}>✨ Instant Detection</Text>
-        <Text style={styles.stepText}>
-          The app will identify the sign and display the correct meaning instantly.
-        </Text>
+        <View style={styles.stepIcon}>
+          <Text style={styles.stepEmoji}>✨</Text>
+        </View>
+        <View style={styles.stepContent}>
+          <Text style={styles.stepTitle}>Instant Detection</Text>
+          <Text style={styles.stepText}>
+            The app instantly shows the detected sign and meaning.
+          </Text>
+        </View>
       </View>
 
-      {/* Common Questions */}
+      {/* FAQ */}
       <View style={styles.faqHeader}>
         <Text style={styles.sectionTitle}>Common Questions</Text>
         <TouchableOpacity onPress={() => setViewAll(!viewAll)}>
@@ -111,24 +124,28 @@ const Help = () => {
         </TouchableOpacity>
       </View>
 
-      {displayedFAQs.map((faq, index) => (
-        <View key={index} style={styles.faqCard}>
-          <TouchableOpacity onPress={() => toggleFAQ(index)}>
-            <Text style={styles.faqQuestion}>{faq.question}</Text>
-          </TouchableOpacity>
+      {displayedFAQs.map((faq, index) => {
+        const isOpen = expandedIndex === index;
+        return (
+          <View key={index} style={styles.faqCard}>
+            <TouchableOpacity
+              style={styles.faqRow}
+              onPress={() => toggleFAQ(index)}
+            >
+              <Text style={styles.faqQuestion}>{faq.question}</Text>
+              <Text style={styles.chevron}>{isOpen ? "▴" : "▾"}</Text>
+            </TouchableOpacity>
 
-          {expandedIndex === index && (
-            <Text style={styles.faqAnswer}>{faq.answer}</Text>
-          )}
-        </View>
-      ))}
+            {isOpen && <Text style={styles.faqAnswer}>{faq.answer}</Text>}
+          </View>
+        );
+      })}
 
-      {/* Contact Support */}
+      {/* Support */}
       <View style={styles.supportBox}>
         <Text style={styles.supportTitle}>Still need help?</Text>
         <Text style={styles.supportText}>
-          Our team is ready to assist you with any issues or feedback you might
-          have.
+          Our team is happy to assist you with questions, issues, or feedback.
         </Text>
 
         <TouchableOpacity style={styles.supportButton}>
@@ -144,102 +161,160 @@ export default Help;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFFBEA",
     padding: 16,
   },
+
   headerImage: {
     width: "100%",
     height: 240,
-    borderRadius: 16,
-    marginBottom: 16,
+    borderRadius: 20,
+    marginBottom: 20,
     resizeMode: "cover",
     marginTop: 30,
   },
+
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 8,
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#222",
+    marginBottom: 10,
   },
+
   description: {
     fontSize: 14,
     color: "#555",
-    lineHeight: 20,
-    marginBottom: 20,
+    lineHeight: 22,
+    marginBottom: 24,
   },
+
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 12,
+    fontWeight: "700",
+    marginBottom: 14,
+    color: "#222",
   },
+
   stepCard: {
-    backgroundColor: "#F8F8F8",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
   },
+
+  stepIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#FFF3C4",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+
+  stepEmoji: {
+    fontSize: 20,
+  },
+
+  stepContent: {
+    flex: 1,
+  },
+
   stepTitle: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: "700",
     marginBottom: 4,
   },
+
   stepText: {
     fontSize: 13,
     color: "#666",
+    lineHeight: 18,
   },
+
   faqHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 26,
     marginBottom: 10,
   },
+
   viewAllText: {
-    color: "#F5B400",
-    fontWeight: "600",
+    color: "#F5A623",
+    fontWeight: "700",
   },
+
   faqCard: {
-    backgroundColor: "#F9F9F9",
-    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
     padding: 14,
-    marginBottom: 8,
+    marginBottom: 10,
+    elevation: 2,
   },
+
+  faqRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
   faqQuestion: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
+    flex: 1,
+    marginRight: 8,
   },
+
+  chevron: {
+    fontSize: 18,
+    color: "#F5A623",
+  },
+
   faqAnswer: {
     fontSize: 13,
     color: "#555",
-    marginTop: 8,
+    marginTop: 10,
     lineHeight: 18,
   },
+
   supportBox: {
-    backgroundColor: "#FFF5D6",
-    borderRadius: 16,
-    padding: 18,
-    marginTop: 24,
-    marginBottom: 30,
+    backgroundColor: "#FFF3C4",
+    borderRadius: 20,
+    padding: 22,
+    marginTop: 30,
+    marginBottom: 40,
     alignItems: "center",
   },
+
   supportTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 6,
+    fontSize: 17,
+    fontWeight: "800",
+    marginBottom: 8,
   },
+
   supportText: {
     fontSize: 13,
     color: "#555",
     textAlign: "center",
-    marginBottom: 14,
+    marginBottom: 16,
   },
+
   supportButton: {
-    backgroundColor: "#F5B400",
+    backgroundColor: "#F5A623",
     paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 24,
+    paddingHorizontal: 30,
+    borderRadius: 30,
   },
+
   supportButtonText: {
-    color: "#000",
-    fontWeight: "700",
+    color: "#FFF",
+    fontWeight: "800",
+    fontSize: 14,
   },
 });
