@@ -111,6 +111,33 @@ export default function ProfileScreen({ navigation }: any) {
   );
 }
 
+/* ---------------- ACHIEVEMENT COMPONENT ---------------- */
+
+const Achievement = ({
+  icon,
+  label,
+  disabled = false,
+}: {
+  icon: string;
+  label: string;
+  disabled?: boolean;
+}) => {
+  return (
+    <View style={{ alignItems: 'center', opacity: disabled ? 0.35 : 1 }}>
+      <View
+        style={[
+          styles.achievementIcon,
+          disabled && { backgroundColor: '#E5E7EB' },
+        ]}
+      >
+        <Text style={{ fontSize: 22 }}>{icon}</Text>
+      </View>
+      <Text style={styles.subText}>{label}</Text>
+    </View>
+  );
+};
+
+
 /* ---------------- COMPONENT ---------------- */
 
 const styles = StyleSheet.create({
@@ -121,6 +148,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 120,
+    marginTop: 40,
   },
 
   /* ---------- HEADER ---------- */
