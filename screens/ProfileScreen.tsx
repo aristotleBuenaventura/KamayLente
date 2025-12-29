@@ -113,99 +113,150 @@ export default function ProfileScreen({ navigation }: any) {
 
 /* ---------------- COMPONENT ---------------- */
 
-const Achievement = ({ icon, label, disabled = false }: any) => (
-  <View style={{ alignItems: 'center', opacity: disabled ? 0.3 : 1 }}>
-    <View style={styles.achievementIcon}>
-      <Text style={{ fontSize: 18 }}>{icon}</Text>
-    </View>
-    <Text style={styles.subText}>{label}</Text>
-  </View>
-);
-
-/* ---------------- STYLES ---------------- */
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFBEA' },
-  content: { padding: 20, paddingBottom: 120 },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF9E6',
+  },
+  content: {
+    padding: 20,
+    paddingBottom: 120,
+  },
 
-  header: { alignItems: 'center', marginBottom: 20 },
+  /* ---------- HEADER ---------- */
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
 
   avatarWrapper: {
     borderWidth: 3,
-    borderColor: '#FBBF24',
+    borderColor: '#FACC15',
     borderRadius: 60,
-    padding: 4,
+    padding: 5,
+    backgroundColor: '#FFF',
+    elevation: 5,
   },
-  avatar: { width: 100, height: 100, borderRadius: 50 },
+  avatar: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+  },
   editIcon: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#FBBF24',
-    borderRadius: 12,
-    padding: 4,
+    backgroundColor: '#FACC15',
+    borderRadius: 14,
+    padding: 6,
+    elevation: 3,
   },
 
-  name: { fontSize: 22, fontWeight: '700', marginTop: 10 },
+  name: {
+    fontSize: 24,
+    fontWeight: '800',
+    marginTop: 12,
+    color: '#111827',
+  },
 
-  badges: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  badges: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+  },
   badge: {
-    backgroundColor: '#FBBF24',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: '#FACC15',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   badgeGray: {
     backgroundColor: '#E5E7EB',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
 
+  /* ---------- CARD ---------- */
   card: {
-    backgroundColor: '#FFF3C4',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
+    backgroundColor: '#FFFFFF',
+    padding: 18,
+    borderRadius: 20,
+    marginBottom: 18,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
   },
 
-  streakTitle: { fontSize: 18, fontWeight: '700' },
+  streakTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#F97316',
+  },
 
+  /* ---------- PROGRESS ---------- */
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  cardTitle: { fontSize: 18, fontWeight: '700' },
-  percent: { fontSize: 16, fontWeight: '700', color: '#F59E0B' },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  percent: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#22C55E',
+  },
 
   progressBarBg: {
-    height: 8,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 8,
-    marginVertical: 10,
+    height: 10,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 10,
+    marginVertical: 12,
+    overflow: 'hidden',
   },
   progressBarFill: {
-    height: 8,
-    backgroundColor: '#F59E0B',
-    borderRadius: 8,
+    height: '100%',
+    backgroundColor: '#22C55E',
+    borderRadius: 10,
   },
 
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: 6,
   },
-  statValue: { fontSize: 18, fontWeight: '700' },
-  subText: { fontSize: 12, color: '#6B7280' },
+  statValue: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#111827',
+  },
 
+  subText: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+
+  /* ---------- ACHIEVEMENTS ---------- */
   achievementRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   achievementIcon: {
+    width: 52,
+    height: 52,
     backgroundColor: '#FEF3C7',
-    padding: 12,
-    borderRadius: 16,
-    marginBottom: 4,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+    elevation: 2,
   },
 });
+
