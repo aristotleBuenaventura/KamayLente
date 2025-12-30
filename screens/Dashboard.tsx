@@ -15,14 +15,21 @@ export default function Dashboard({ navigation }: any) {
   useEffect(() => {
     const loadName = async () => {
       try {
-        const savedName = await AsyncStorage.getItem('name');
-        if (savedName) setName(savedName);
+        const storedProfile = await AsyncStorage.getItem('USER_PROFILE');
+        if (storedProfile) {
+          const parsed = JSON.parse(storedProfile);
+          if (parsed.name) {
+            setName(parsed.name);
+          }
+        }
       } catch (error) {
-        console.log('Error loading name:', error);
+        console.log('Error loading profile:', error);
       }
     };
+
     loadName();
   }, []);
+
 
   return (
     <View style={styles.container}>
