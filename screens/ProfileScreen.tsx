@@ -32,8 +32,11 @@ export default function ProfileScreen({ navigation }: any) {
 
   /* ---------------- STATE ---------------- */
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState('Alex Cruz');
-  const [avatar, setAvatar] = useState('https://i.pravatar.cc/150');
+  const [name, setName] = useState('No Name');
+  const [avatar, setAvatar] = useState(
+    'https://www.gravatar.com/avatar/?d=mp&s=150'
+  );
+
   const [loading, setLoading] = useState(true);
 
   /* ---------------- LOAD PROFILE ---------------- */
