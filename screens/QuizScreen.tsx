@@ -205,7 +205,7 @@ export default function QuizScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFBEA", padding: 20 },
+  container: { flex: 1, backgroundColor: "#FFFBEA", padding: 20,  },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10, marginTop: 20 },
   closeButton: { width: 40, height: 40 },
   closeText: { color: '#000', fontSize: 18, fontWeight: 'bold' },

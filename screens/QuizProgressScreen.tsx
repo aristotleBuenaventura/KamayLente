@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFBEA',
     paddingTop: 10,
+    paddingTop: 30,
   },
   modulesContainer: {
     paddingHorizontal: 20,

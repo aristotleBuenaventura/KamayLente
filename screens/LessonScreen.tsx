@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFBEA',
+    paddingTop: 10,
   },
 
 boxContainer:{

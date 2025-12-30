@@ -141,13 +141,18 @@ export default function ProfileScreen({ navigation }: any) {
   /* ---------------- QUIZ STATS ---------------- */
   const quizStats = useMemo(() => {
     const total = QuizModule.length;
-    const passed = QuizModule.filter(
-      (q) => quizProgress[q.id]?.score >= 0.7
-    ).length;
+    if (total === 0) return { passed: 0, total: 0, percent: 0 };
 
-    const percent = total === 0 ? 0 : Math.round((passed / total) * 100);
+    let passed = 0;
+    QuizModule.forEach((quiz) => {
+      const score = quizProgress[quiz.id.toString()]?.score || 0; // <-- convert id to string
+      if (score >= 0.7) passed += 1;
+    });
+
+    const percent = Math.round((passed / total) * 100);
     return { passed, total, percent };
   }, [quizProgress]);
+
 
   if (loading) return null;
 
@@ -269,8 +274,8 @@ const Achievement = ({
 
 /* ---------------- STYLES ---------------- */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF9E6' },
-  content: { padding: 20, paddingBottom: 120 , marginTop: 20,},
+  container: { flex: 1, backgroundColor: '#FFF9E6', paddingTop: 20, },
+  content: { padding: 20, paddingBottom: 120 },
 
   header: { alignItems: 'center', marginBottom: 24 },
 

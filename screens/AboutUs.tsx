@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
 
   content: {
     padding: 24,
-    paddingTop: 40,
+    paddingTop: 20,
   },
 
   sectionLabel: {
