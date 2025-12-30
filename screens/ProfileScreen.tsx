@@ -23,6 +23,7 @@ import { QuizModule } from './QuizModule';
 import BottomNav from './BottomNav';
 
 const STORAGE_KEY = 'USER_PROFILE';
+const STREAK_KEY = 'USER_STREAK';
 
 export default function ProfileScreen({ navigation }: any) {
   const { completedModules, totalModules, overallProgress } =
@@ -36,8 +37,11 @@ export default function ProfileScreen({ navigation }: any) {
   const [avatar, setAvatar] = useState(
     'https://www.gravatar.com/avatar/?d=mp&s=150'
   );
-
   const [loading, setLoading] = useState(true);
+
+  // 🔥 STREAK
+  const [streak, setStreak] = useState(0);
+  const [lastUsed, setLastUsed] = useState<string | null>(null);
 
   /* ---------------- LOAD PROFILE ---------------- */
   useEffect(() => {
@@ -59,6 +63,57 @@ export default function ProfileScreen({ navigation }: any) {
     loadProfile();
   }, []);
 
+  /* ---------------- STREAK LOGIC ---------------- */
+  useEffect(() => {
+    const updateStreak = async () => {
+      try {
+        const today = new Date().toDateString();
+        const stored = await AsyncStorage.getItem(STREAK_KEY);
+
+        if (stored) {
+          const { streak: savedStreak, lastUsed } = JSON.parse(stored);
+
+          if (lastUsed === today) {
+            setStreak(savedStreak);
+            setLastUsed(lastUsed);
+            return;
+          }
+
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+
+          if (lastUsed === yesterday.toDateString()) {
+            const newStreak = savedStreak + 1;
+            setStreak(newStreak);
+            setLastUsed(today);
+            await AsyncStorage.setItem(
+              STREAK_KEY,
+              JSON.stringify({ streak: newStreak, lastUsed: today })
+            );
+          } else {
+            setStreak(1);
+            setLastUsed(today);
+            await AsyncStorage.setItem(
+              STREAK_KEY,
+              JSON.stringify({ streak: 1, lastUsed: today })
+            );
+          }
+        } else {
+          setStreak(1);
+          setLastUsed(today);
+          await AsyncStorage.setItem(
+            STREAK_KEY,
+            JSON.stringify({ streak: 1, lastUsed: today })
+          );
+        }
+      } catch (e) {
+        console.log('Streak error', e);
+      }
+    };
+
+    updateStreak();
+  }, []);
+
   /* ---------------- SAVE PROFILE ---------------- */
   const saveProfile = async () => {
     try {
@@ -73,13 +128,10 @@ export default function ProfileScreen({ navigation }: any) {
   /* ---------------- IMAGE PICKER ---------------- */
   const pickImage = () => {
     launchImageLibrary(
-      {
-        mediaType: 'photo',
-        quality: 0.8,
-      },
+      { mediaType: 'photo', quality: 0.8 },
       (response) => {
         if (response.didCancel) return;
-        if (response.assets && response.assets.length > 0) {
+        if (response.assets?.length) {
           setAvatar(response.assets[0].uri!);
         }
       }
@@ -106,20 +158,11 @@ export default function ProfileScreen({ navigation }: any) {
         <View style={styles.header}>
           <View style={styles.avatarWrapper}>
             <Image source={{ uri: avatar }} style={styles.avatar} />
-
             <TouchableOpacity
               style={styles.editIcon}
-              onPress={() => {
-                if (!isEditing) {
-                  setIsEditing(true);
-                } else {
-                  pickImage();
-                }
-              }}
+              onPress={() => (isEditing ? pickImage() : setIsEditing(true))}
             >
-              <Text style={{ color: '#fff' }}>
-                {isEditing ? '🖼' : '✎'}
-              </Text>
+              <Text style={{ color: '#fff' }}>{isEditing ? '🖼' : '✎'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -135,28 +178,24 @@ export default function ProfileScreen({ navigation }: any) {
           )}
 
           {isEditing && (
-            <TouchableOpacity
-              style={styles.saveBtn}
-              onPress={saveProfile}
-            >
+            <TouchableOpacity style={styles.saveBtn} onPress={saveProfile}>
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           )}
 
           <View style={styles.badges}>
-            <View style={styles.badge}>
-              <Text>FSL</Text>
-            </View>
-            <View style={styles.badgeGray}>
-              <Text>Beginner</Text>
-            </View>
+            <View style={styles.badge}><Text>FSL</Text></View>
+            <View style={styles.badgeGray}><Text>Beginner</Text></View>
           </View>
         </View>
 
         {/* ---------------- STREAK ---------------- */}
-        <View style={styles.card}>
-          <Text style={styles.streakTitle}>🔥 7 Day Streak</Text>
-          <Text style={styles.subText}>Last practice: Today</Text>
+        <View style={[styles.card, styles.centerCard]}>
+          <Text style={styles.streakEmoji}>🔥</Text>
+          <Text style={styles.streakTitle}>{streak} Day Streak</Text>
+          <Text style={styles.subText}>
+            Last practice: {lastUsed === new Date().toDateString() ? 'Today' : lastUsed}
+          </Text>
         </View>
 
         {/* ---------------- PROGRESS ---------------- */}
@@ -168,10 +207,7 @@ export default function ProfileScreen({ navigation }: any) {
 
           <View style={styles.progressBarBg}>
             <View
-              style={[
-                styles.progressBarFill,
-                { width: `${overallProgress}%` },
-              ]}
+              style={[styles.progressBarFill, { width: `${overallProgress}%` }]}
             />
           </View>
 
@@ -208,8 +244,7 @@ export default function ProfileScreen({ navigation }: any) {
   );
 }
 
-/* ---------------- ACHIEVEMENT ---------------- */
-
+/* ---------------- ACHIEVEMENT COMPONENT ---------------- */
 const Achievement = ({
   icon,
   label,
@@ -233,22 +268,11 @@ const Achievement = ({
 );
 
 /* ---------------- STYLES ---------------- */
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF9E6',
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 120,
-    marginTop: 20,
-  },
+  container: { flex: 1, backgroundColor: '#FFF9E6' },
+  content: { padding: 20, paddingBottom: 120 , marginTop: 20,},
 
-  header: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
+  header: { alignItems: 'center', marginBottom: 24 },
 
   avatarWrapper: {
     borderWidth: 3,
@@ -258,11 +282,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     elevation: 5,
   },
-  avatar: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-  },
+  avatar: { width: 110, height: 110, borderRadius: 55 },
+
   editIcon: {
     position: 'absolute',
     bottom: 0,
@@ -272,12 +293,7 @@ const styles = StyleSheet.create({
     padding: 6,
   },
 
-  name: {
-    fontSize: 24,
-    fontWeight: '800',
-    marginTop: 12,
-    color: '#111827',
-  },
+  name: { fontSize: 24, fontWeight: '800', marginTop: 12 },
   nameInput: {
     fontSize: 24,
     fontWeight: '800',
@@ -285,7 +301,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#FACC15',
     textAlign: 'center',
-    color: '#111827',
   },
 
   saveBtn: {
@@ -295,56 +310,27 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
   },
-  saveText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
+  saveText: { color: '#fff', fontWeight: '700' },
 
-  badges: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 10,
-  },
-  badge: {
-    backgroundColor: '#FACC15',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  badgeGray: {
-    backgroundColor: '#E5E7EB',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
+  badges: { flexDirection: 'row', gap: 10, marginTop: 10 },
+  badge: { backgroundColor: '#FACC15', padding: 8, borderRadius: 20 },
+  badgeGray: { backgroundColor: '#E5E7EB', padding: 8, borderRadius: 20 },
 
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF',
     padding: 18,
     borderRadius: 20,
     marginBottom: 18,
     elevation: 4,
   },
 
-  streakTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#F97316',
-  },
+  centerCard: { alignItems: 'center' },
+  streakEmoji: { fontSize: 40 },
+  streakTitle: { fontSize: 20, fontWeight: '800', color: '#F97316' },
 
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  percent: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#22C55E',
-  },
+  progressHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+  cardTitle: { fontSize: 18, fontWeight: '700' },
+  percent: { fontWeight: '700', color: '#22C55E' },
 
   progressBarBg: {
     height: 10,
@@ -352,24 +338,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 12,
   },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#22C55E',
-  },
+  progressBarFill: { height: '100%', backgroundColor: '#22C55E' },
 
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '800',
-  },
-
-  subText: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  statValue: { fontSize: 20, fontWeight: '800' },
+  subText: { fontSize: 12, color: '#6B7280' },
 
   achievementRow: {
     flexDirection: 'row',
