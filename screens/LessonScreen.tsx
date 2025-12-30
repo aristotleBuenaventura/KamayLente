@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
 
 boxContainer:{
-    marginTop: 30,
+    marginTop: 10,
     },
 
   header: {

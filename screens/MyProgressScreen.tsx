@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFBEA',
-    paddingTop: 50,
+    paddingTop: 10,
   },
     sectionTitle: {
         fontSize: 22,

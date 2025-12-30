@@ -8,7 +8,7 @@ export default function HomeScreen({ navigation }: any) { // <-- receive navigat
     <SafeAreaView style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
-          source={{ uri: 'https://drive.google.com/uc?export=view&id=1wYTeLUivykHcXunRCLIU2DwNUImMzExZ' }}
+          source={require("./Images/logo.png")}
           style={styles.logo}
         />
       </View>

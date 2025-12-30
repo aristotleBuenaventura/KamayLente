@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingBottom: 100,
-    marginTop: 20,
   },
   welcome: {
     fontSize: 24,

@@ -1,5 +1,10 @@
 // screens/ProfileScreen.tsx
-import React, { useContext, useMemo } from 'react';
+import React, {
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+} from 'react';
 import {
   View,
   Text,
@@ -7,22 +12,78 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  TextInput,
 } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { ProgressContext } from './ProgressContext';
 import { QuizProgressContext } from './QuizProgressContext';
 import { QuizModule } from './QuizModule';
 import BottomNav from './BottomNav';
 
+const STORAGE_KEY = 'USER_PROFILE';
+
 export default function ProfileScreen({ navigation }: any) {
-  const {
-    completedModules,
-    totalModules,
-    overallProgress,
-  } = useContext(ProgressContext);
+  const { completedModules, totalModules, overallProgress } =
+    useContext(ProgressContext);
 
   const { quizProgress } = useContext(QuizProgressContext);
 
-  /** Quiz completion % */
+  /* ---------------- STATE ---------------- */
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState('Alex Cruz');
+  const [avatar, setAvatar] = useState('https://i.pravatar.cc/150');
+  const [loading, setLoading] = useState(true);
+
+  /* ---------------- LOAD PROFILE ---------------- */
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.name) setName(parsed.name);
+          if (parsed.avatar) setAvatar(parsed.avatar);
+        }
+      } catch (e) {
+        console.log('Failed to load profile', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  /* ---------------- SAVE PROFILE ---------------- */
+  const saveProfile = async () => {
+    try {
+      const data = { name, avatar };
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setIsEditing(false);
+    } catch (e) {
+      console.log('Failed to save profile', e);
+    }
+  };
+
+  /* ---------------- IMAGE PICKER ---------------- */
+  const pickImage = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 0.8,
+      },
+      (response) => {
+        if (response.didCancel) return;
+        if (response.assets && response.assets.length > 0) {
+          setAvatar(response.assets[0].uri!);
+        }
+      }
+    );
+  };
+
+  /* ---------------- QUIZ STATS ---------------- */
   const quizStats = useMemo(() => {
     const total = QuizModule.length;
     const passed = QuizModule.filter(
@@ -33,36 +94,69 @@ export default function ProfileScreen({ navigation }: any) {
     return { passed, total, percent };
   }, [quizProgress]);
 
+  if (loading) return null;
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Profile Header */}
+        {/* ---------------- PROFILE HEADER ---------------- */}
         <View style={styles.header}>
           <View style={styles.avatarWrapper}>
-            <Image
-              source={{ uri: 'https://i.pravatar.cc/150' }}
-              style={styles.avatar}
-            />
-            <TouchableOpacity style={styles.editIcon}>
-              <Text style={{ color: '#fff' }}>✎</Text>
+            <Image source={{ uri: avatar }} style={styles.avatar} />
+
+            <TouchableOpacity
+              style={styles.editIcon}
+              onPress={() => {
+                if (!isEditing) {
+                  setIsEditing(true);
+                } else {
+                  pickImage();
+                }
+              }}
+            >
+              <Text style={{ color: '#fff' }}>
+                {isEditing ? '🖼' : '✎'}
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.name}>Alex Cruz</Text>
+          {isEditing ? (
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              style={styles.nameInput}
+              autoFocus
+            />
+          ) : (
+            <Text style={styles.name}>{name}</Text>
+          )}
+
+          {isEditing && (
+            <TouchableOpacity
+              style={styles.saveBtn}
+              onPress={saveProfile}
+            >
+              <Text style={styles.saveText}>Save</Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.badges}>
-            <View style={styles.badge}><Text>FSL</Text></View>
-            <View style={styles.badgeGray}><Text>Beginner</Text></View>
+            <View style={styles.badge}>
+              <Text>FSL</Text>
+            </View>
+            <View style={styles.badgeGray}>
+              <Text>Beginner</Text>
+            </View>
           </View>
         </View>
 
-        {/* Streak */}
+        {/* ---------------- STREAK ---------------- */}
         <View style={styles.card}>
           <Text style={styles.streakTitle}>🔥 7 Day Streak</Text>
           <Text style={styles.subText}>Last practice: Today</Text>
         </View>
 
-        {/* Learning Progress */}
+        {/* ---------------- PROGRESS ---------------- */}
         <View style={styles.card}>
           <View style={styles.progressHeader}>
             <Text style={styles.cardTitle}>Learning Progress</Text>
@@ -95,13 +189,13 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* Achievements */}
+        {/* ---------------- ACHIEVEMENTS ---------------- */}
         <View style={styles.card}>
           <View style={styles.achievementRow}>
-            <Achievement label="Beginner" icon="🏆" />
-            <Achievement label="Fast Learner" icon="⚡" />
-            <Achievement label="Week Streak" icon="📅" />
-            <Achievement label="Master" icon="🎓" disabled />
+            <Achievement icon="🏆" label="Beginner" />
+            <Achievement icon="⚡" label="Fast Learner" />
+            <Achievement icon="📅" label="Week Streak" />
+            <Achievement icon="🎓" label="Master" disabled />
           </View>
         </View>
       </ScrollView>
@@ -111,7 +205,7 @@ export default function ProfileScreen({ navigation }: any) {
   );
 }
 
-/* ---------------- ACHIEVEMENT COMPONENT ---------------- */
+/* ---------------- ACHIEVEMENT ---------------- */
 
 const Achievement = ({
   icon,
@@ -121,24 +215,21 @@ const Achievement = ({
   icon: string;
   label: string;
   disabled?: boolean;
-}) => {
-  return (
-    <View style={{ alignItems: 'center', opacity: disabled ? 0.35 : 1 }}>
-      <View
-        style={[
-          styles.achievementIcon,
-          disabled && { backgroundColor: '#E5E7EB' },
-        ]}
-      >
-        <Text style={{ fontSize: 22 }}>{icon}</Text>
-      </View>
-      <Text style={styles.subText}>{label}</Text>
+}) => (
+  <View style={{ alignItems: 'center', opacity: disabled ? 0.35 : 1 }}>
+    <View
+      style={[
+        styles.achievementIcon,
+        disabled && { backgroundColor: '#E5E7EB' },
+      ]}
+    >
+      <Text style={{ fontSize: 22 }}>{icon}</Text>
     </View>
-  );
-};
+    <Text style={styles.subText}>{label}</Text>
+  </View>
+);
 
-
-/* ---------------- COMPONENT ---------------- */
+/* ---------------- STYLES ---------------- */
 
 const styles = StyleSheet.create({
   container: {
@@ -148,10 +239,8 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 120,
-    marginTop: 40,
   },
 
-  /* ---------- HEADER ---------- */
   header: {
     alignItems: 'center',
     marginBottom: 24,
@@ -177,7 +266,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FACC15',
     borderRadius: 14,
     padding: 6,
-    elevation: 3,
   },
 
   name: {
@@ -185,6 +273,27 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginTop: 12,
     color: '#111827',
+  },
+  nameInput: {
+    fontSize: 24,
+    fontWeight: '800',
+    marginTop: 12,
+    borderBottomWidth: 1,
+    borderColor: '#FACC15',
+    textAlign: 'center',
+    color: '#111827',
+  },
+
+  saveBtn: {
+    marginTop: 8,
+    backgroundColor: '#22C55E',
+    paddingHorizontal: 20,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  saveText: {
+    color: '#fff',
+    fontWeight: '700',
   },
 
   badges: {
@@ -205,17 +314,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
-  /* ---------- CARD ---------- */
   card: {
     backgroundColor: '#FFFFFF',
     padding: 18,
     borderRadius: 20,
     marginBottom: 18,
     elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
   },
 
   streakTitle: {
@@ -224,16 +328,13 @@ const styles = StyleSheet.create({
     color: '#F97316',
   },
 
-  /* ---------- PROGRESS ---------- */
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
   },
   percent: {
     fontSize: 16,
@@ -246,32 +347,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     borderRadius: 10,
     marginVertical: 12,
-    overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: '#22C55E',
-    borderRadius: 10,
   },
 
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 6,
   },
   statValue: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#111827',
   },
 
   subText: {
     fontSize: 12,
     color: '#6B7280',
-    marginTop: 2,
   },
 
-  /* ---------- ACHIEVEMENTS ---------- */
   achievementRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -284,7 +379,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-    elevation: 2,
   },
 });
-
