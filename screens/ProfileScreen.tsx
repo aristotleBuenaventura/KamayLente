@@ -117,8 +117,10 @@ export default function ProfileScreen({ navigation }: any) {
   /* ---------------- SAVE PROFILE ---------------- */
   const saveProfile = async () => {
     try {
-      const data = { name, avatar };
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      await AsyncStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ name, avatar })
+      );
       setIsEditing(false);
     } catch (e) {
       console.log('Failed to save profile', e);
@@ -138,21 +140,23 @@ export default function ProfileScreen({ navigation }: any) {
     );
   };
 
-  /* ---------------- QUIZ STATS ---------------- */
+  /* ---------------- QUIZ STATS (PASS = 0.1) ---------------- */
   const quizStats = useMemo(() => {
-    const total = QuizModule.length;
-    if (total === 0) return { passed: 0, total: 0, percent: 0 };
+    if (!quizProgress || QuizModule.length === 0) {
+      return { passed: 0, total: QuizModule.length, percent: 0 };
+    }
 
-    let passed = 0;
-    QuizModule.forEach((quiz) => {
-      const score = quizProgress[quiz.id.toString()]?.score || 0; // <-- convert id to string
-      if (score >= 0.7) passed += 1;
-    });
+    const total = QuizModule.length;
+
+    const passed = QuizModule.filter((quiz) => {
+      const progress = quizProgress[quiz.id];
+      return progress && progress.score >= 0.1; // ✅ PASSING SCORE = 0.1
+    }).length;
 
     const percent = Math.round((passed / total) * 100);
+
     return { passed, total, percent };
   }, [quizProgress]);
-
 
   if (loading) return null;
 
@@ -249,7 +253,7 @@ export default function ProfileScreen({ navigation }: any) {
   );
 }
 
-/* ---------------- ACHIEVEMENT COMPONENT ---------------- */
+/* ---------------- ACHIEVEMENT ---------------- */
 const Achievement = ({
   icon,
   label,
@@ -274,7 +278,7 @@ const Achievement = ({
 
 /* ---------------- STYLES ---------------- */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF9E6', paddingTop: 20, },
+  container: { flex: 1, backgroundColor: '#FFF9E6', paddingTop: 20 },
   content: { padding: 20, paddingBottom: 120 },
 
   header: { alignItems: 'center', marginBottom: 24 },
