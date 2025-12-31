@@ -34,11 +34,10 @@ export default function App() {
 
         if (config.appDisabled) {
           setDisabled(true);
-          setMessage(config.message || 'App is currently unavailable.');
+          setMessage(config.message || '');
         }
       } catch (err) {
         console.log('Kill switch check failed:', err);
-        // Optional: allow app to continue if fetch fails
       } finally {
         setLoading(false);
       }
@@ -47,7 +46,6 @@ export default function App() {
     checkKillSwitch();
   }, []);
 
-  // Loading screen
   if (loading) {
     return (
       <View style={styles.center}>
@@ -57,17 +55,15 @@ export default function App() {
     );
   }
 
-  // Maintenance / Kill switch screen
   if (disabled) {
     return (
       <View style={styles.center}>
-        <Text style={styles.title}>🚧 Maintenance</Text>
+        <Text style={styles.title}></Text>
         <Text style={styles.message}>{message}</Text>
       </View>
     );
   }
 
-  // Normal app
   return (
     <ProgressProvider>
       <QuizProgressProvider>
