@@ -1,6 +1,6 @@
 // App.tsx
-import React from 'react';
-import { StatusBar } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StatusBar, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -8,17 +8,66 @@ import HomeScreen from './screens/HomeScreen';
 import Dashboard from './screens/Dashboard';
 import ProfileScreen from './screens/ProfileScreen';
 import MyProgressScreen from './screens/MyProgressScreen';
-import LessonScreen from './screens/LessonScreen'; // dynamic lesson screen
+import LessonScreen from './screens/LessonScreen';
 import QuizScreen from './screens/QuizScreen';
-import { ProgressProvider } from './screens/ProgressContext';
-import { QuizProgressProvider } from './screens/QuizProgressContext'; // NEW
 import QuizProgressScreen from './screens/QuizProgressScreen';
 import AboutUs from './screens/AboutUs';
 import Help from './screens/Help';
 
+import { ProgressProvider } from './screens/ProgressContext';
+import { QuizProgressProvider } from './screens/QuizProgressContext';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
+  const [disabled, setDisabled] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const checkKillSwitch = async () => {
+      try {
+        const res = await fetch(
+          'https://drive.google.com/uc?export=download&id=1LO9Ej8N81u4X3ci6CPcXqlLScilWPo22'
+        );
+        const config = await res.json();
+
+        if (config.appDisabled) {
+          setDisabled(true);
+          setMessage(config.message || 'App is currently unavailable.');
+        }
+      } catch (err) {
+        console.log('Kill switch check failed:', err);
+        // Optional: allow app to continue if fetch fails
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkKillSwitch();
+  }, []);
+
+  // Loading screen
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+        <Text>Checking app status...</Text>
+      </View>
+    );
+  }
+
+  // Maintenance / Kill switch screen
+  if (disabled) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.title}>🚧 Maintenance</Text>
+        <Text style={styles.message}>{message}</Text>
+      </View>
+    );
+  }
+
+  // Normal app
   return (
     <ProgressProvider>
       <QuizProgressProvider>
@@ -40,3 +89,21 @@ export default function App() {
     </ProgressProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  message: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+});

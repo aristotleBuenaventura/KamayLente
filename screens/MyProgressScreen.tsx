@@ -4,7 +4,7 @@ import {LearningModule} from './LearningModule';
 import {
   View,
   Text,
-  StyleSheet,
+  StyleSheet,                                   
   TouchableOpacity,
   Image,
   ScrollView,
