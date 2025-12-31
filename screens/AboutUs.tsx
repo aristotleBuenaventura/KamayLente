@@ -65,6 +65,7 @@ export default function AboutUs({ navigation }: any) {
             <Text style={styles.valueText}>COMMUNITY</Text>
           </View>
 
+
           <View style={styles.valueCard}>
             <Text style={styles.valueIcon}>💡</Text>
             <Text style={styles.valueText}>INNOVATION</Text>

@@ -70,15 +70,7 @@ export default function App() {
         <NavigationContainer>
           <StatusBar barStyle="dark-content" />
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Dashboard" component={Dashboard} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen name="Lesson" component={LessonScreen} />
-            <Stack.Screen name="QuizScreen" component={QuizScreen} />
-            <Stack.Screen name="MyProgressScreen" component={MyProgressScreen} />
-            <Stack.Screen name="QuizProgressScreen" component={QuizProgressScreen} />
-            <Stack.Screen name="AboutUs" component={AboutUs} />
-            <Stack.Screen name="Help" component={Help} />
+
           </Stack.Navigator>
         </NavigationContainer>
       </QuizProgressProvider>
