@@ -1,4 +1,3 @@
-// screens/QuizProgressScreen.tsx
 import React, { useContext } from 'react';
 import {
   View,
@@ -30,31 +29,59 @@ export default function QuizProgressScreen({ navigation }: any) {
 
         {QuizModule.map((quiz) => {
           const score = quizProgress[quiz.id]?.score || 0;
-          const passed = score >= 0.7; // passing threshold
           const attempts = quizProgress[quiz.id]?.attempts || 0;
           const lastTaken = quizProgress[quiz.id]?.lastTaken;
+
+          const passed = score >= 0.1; // 70% passing score
           const unlocked =
-            !quiz.unlockAfter || (quizProgress[quiz.unlockAfter]?.score || 0) >= 0.1;
+            !quiz.unlockAfter ||
+            (quizProgress[quiz.unlockAfter]?.score || 0) >= 0.1;
 
           return (
             <View
               key={quiz.id}
-              style={[styles.moduleCard, unlocked ? styles.activeModule : styles.lockedModule]}
+              style={[
+                styles.moduleCard,
+                unlocked ? styles.activeModule : styles.lockedModule,
+              ]}
             >
               <Image source={quiz.image} style={styles.moduleImage} />
+
               <View style={styles.moduleTextContainer}>
-                <Text style={styles.moduleTitle}>{quiz.title}</Text>
+                {/* TITLE + PASSED BADGE */}
+                <View style={styles.titleRow}>
+                  <Text
+                    style={styles.moduleTitle}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {quiz.title}
+                  </Text>
+
+                  {passed && (
+                    <View style={styles.passedBadge}>
+                      <Text style={styles.passedBadgeText}>PASSED</Text>
+                    </View>
+                  )}
+                </View>
+
                 {quiz.description && (
-                  <Text style={styles.moduleDescription}>{quiz.description}</Text>
+                  <Text style={styles.moduleDescription}>
+                    {quiz.description}
+                  </Text>
                 )}
+
                 <Text style={styles.scoreText}>
                   Score: {Math.round(score * 100)}% | Attempts: {attempts}
                 </Text>
+
                 {lastTaken && (
                   <Text style={styles.lastTakenText}>
-                    Last Taken: {new Date(lastTaken).toLocaleDateString()}
+                    Last Taken:{' '}
+                    {new Date(lastTaken).toLocaleDateString()}
                   </Text>
                 )}
+
                 {!unlocked && (
                   <Text style={styles.lockedText}>
                     Complete previous quiz to unlock
@@ -65,9 +92,14 @@ export default function QuizProgressScreen({ navigation }: any) {
               <TouchableOpacity
                 style={styles.actionButton}
                 disabled={!unlocked}
-                onPress={() => unlocked && navigation.navigate('QuizScreen', { quiz })}
+                onPress={() =>
+                  unlocked &&
+                  navigation.navigate('QuizScreen', { quiz })
+                }
               >
-                <Text style={styles.actionButtonText}>{unlocked ? '▶' : '🔒'}</Text>
+                <Text style={styles.actionButtonText}>
+                  {unlocked ? '▶' : '🔒'}
+                </Text>
               </TouchableOpacity>
             </View>
           );
@@ -83,7 +115,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFBEA',
-    paddingTop: 10,
     paddingTop: 30,
   },
   modulesContainer: {
@@ -118,11 +149,21 @@ const styles = StyleSheet.create({
   moduleTextContainer: {
     flex: 1,
   },
+
+  /* TITLE ROW */
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   moduleTitle: {
+    flex: 1,
+    marginRight: 8,
     color: '#333',
     fontSize: 18,
     fontWeight: 'bold',
   },
+
   moduleDescription: {
     color: '#666',
     fontSize: 14,
@@ -133,6 +174,20 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 5,
   },
+
+  /* PASSED BADGE */
+  passedBadge: {
+    backgroundColor: '#C8E6C9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  passedBadgeText: {
+    color: '#2E7D32',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
   lastTakenText: {
     fontSize: 12,
     color: '#999',
