@@ -8,13 +8,14 @@ import HomeScreen from './screens/HomeScreen';
 import Dashboard from './screens/Dashboard';
 import ProfileScreen from './screens/ProfileScreen';
 import MyProgressScreen from './screens/MyProgressScreen';
-import LessonScreen from './screens/LessonScreen'; // dynamic lesson screen
+import LessonScreen from './screens/LessonScreen';
 import QuizScreen from './screens/QuizScreen';
 import { ProgressProvider } from './screens/ProgressContext';
-import { QuizProgressProvider } from './screens/QuizProgressContext'; // NEW
+import { QuizProgressProvider } from './screens/QuizProgressContext';
 import QuizProgressScreen from './screens/QuizProgressScreen';
 import AboutUs from './screens/AboutUs';
 import Help from './screens/Help';
+import CameraScreen from './screens/CameraScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +27,7 @@ export default function App() {
           <StatusBar barStyle="dark-content" />
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Camera" component={CameraScreen} />
             <Stack.Screen name="Dashboard" component={Dashboard} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Lesson" component={LessonScreen} />

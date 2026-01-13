@@ -14,9 +14,14 @@ export default function HomeScreen({ navigation }: any) { // <-- receive navigat
       </View>
 
       <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Camera')}
+        >
           <Text style={styles.buttonText}>Detect Gesture.</Text>
         </TouchableOpacity>
+
+
 
         <TouchableOpacity
           style={styles.button}
