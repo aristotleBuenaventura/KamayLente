@@ -7,11 +7,27 @@ To test the YOLOv11 integration without a trained model, you can generate a dumm
 ### Option 1: Generate Dummy Model (Recommended)
 
 1. **Install TensorFlow** (if not already installed):
+   
+   **⚠️ Important**: TensorFlow requires Python 3.8-3.12. If you have Python 3.14, install Python 3.12 and use:
+   ```bash
+   py -3.12 -m pip install tensorflow
+   ```
+   
+   Or if you have a compatible Python version:
    ```bash
    pip install tensorflow
    ```
+   
+   See `PYTHON_SETUP.md` in the project root for detailed instructions.
 
 2. **Run the generator script**:
+   
+   If using Python 3.12 (required for TensorFlow):
+   ```bash
+   py -3.12 assets/generate_dummy_model.py
+   ```
+   
+   Or if you have TensorFlow installed with your default Python:
    ```bash
    cd assets
    python generate_dummy_model.py
@@ -74,9 +90,9 @@ If you want to test with a real (but not sign language specific) model:
 ## Troubleshooting
 
 ### "No module named 'tensorflow'"
-```bash
-pip install tensorflow
-```
+- If you have Python 3.14, you need Python 3.12 (see `PYTHON_SETUP.md`)
+- Install with: `py -3.12 -m pip install tensorflow`
+- Or with compatible Python: `pip install tensorflow`
 
 ### "Model file not found" error in app
 - Make sure the .tflite file is in the `assets/` folder
