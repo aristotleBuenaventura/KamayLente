@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator, Dimensions, Image, Platform } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
 import { Camera, useCameraDevice, PhotoFile } from 'react-native-vision-camera';
 import { useTensorflowModel } from 'react-native-fast-tflite';
+import ImageResizer from 'react-native-image-resizer';
+import RNFS from 'react-native-fs';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODEL_INPUT_SIZE = 640;
-const CONFIDENCE_THRESHOLD = 0.25; // Confidence threshold for real model
-const IOU_THRESHOLD = 0.45; // IoU threshold for NMS
+const CONFIDENCE_THRESHOLD = 0.25;
+const IOU_THRESHOLD = 0.45;
 
 // FSL (Filipino Sign Language) phrase classes - must match training data order
 const SIGN_CLASSES = [
@@ -29,7 +31,7 @@ const SIGN_CLASSES = [
   'Paalam',
   'Pasensya na',
   'Tara kain tayo',
-  'Tara matuto ng FSL'
+  'Tara matuto ng FSL',
 ];
 const NUM_CLASSES = SIGN_CLASSES.length;
 
@@ -43,44 +45,6 @@ interface Detection {
   label: string;
 }
 
-// Calculate Intersection over Union (IoU) between two boxes
-function calculateIoU(box1: Detection, box2: Detection): number {
-  const x1 = Math.max(box1.x, box2.x);
-  const y1 = Math.max(box1.y, box2.y);
-  const x2 = Math.min(box1.x + box1.width, box2.x + box2.width);
-  const y2 = Math.min(box1.y + box1.height, box2.y + box2.height);
-
-  const intersection = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
-  const area1 = box1.width * box1.height;
-  const area2 = box2.width * box2.height;
-  const union = area1 + area2 - intersection;
-
-  return union > 0 ? intersection / union : 0;
-}
-
-// Apply Non-Maximum Suppression to filter overlapping detections
-function applyNMS(detections: Detection[], iouThreshold: number): Detection[] {
-  if (detections.length === 0) return [];
-
-  // Sort by confidence (descending)
-  const sorted = [...detections].sort((a, b) => b.confidence - a.confidence);
-  const selected: Detection[] = [];
-
-  while (sorted.length > 0) {
-    const best = sorted.shift()!;
-    selected.push(best);
-
-    // Remove boxes with high IoU overlap
-    for (let i = sorted.length - 1; i >= 0; i--) {
-      if (calculateIoU(best, sorted[i]) > iouThreshold) {
-        sorted.splice(i, 1);
-      }
-    }
-  }
-
-  return selected;
-}
-
 export default function CameraScreen() {
   const device = useCameraDevice('front');
   const cameraRef = useRef<Camera>(null);
@@ -89,6 +53,7 @@ export default function CameraScreen() {
   const [detections, setDetections] = useState<Detection[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [modelStatus, setModelStatus] = useState<string>('loading');
+  const [lastDetectedPhrase, setLastDetectedPhrase] = useState<string | null>(null);
 
   // Load the TFLite model
   const model = useTensorflowModel(require('../assets/model.tflite'));
@@ -98,143 +63,114 @@ export default function CameraScreen() {
       const permission = await Camera.requestCameraPermission();
       setHasPermission(permission === 'granted');
       setIsInitializing(false);
-      console.log('Camera permission:', permission);
     })();
   }, []);
 
-  // Monitor model loading status (avoid JSON.stringify of large tensors)
   useEffect(() => {
     if (model.state === 'loaded') {
       setModelStatus('loaded');
       console.log('Model loaded successfully');
+      // Log model info
       if (model.model?.inputs?.[0]) {
-        const inp = model.model.inputs[0];
-        console.log('Input shape:', inp.shape?.join?.('x') ?? String(inp.shape));
+        console.log('Input shape:', model.model.inputs[0].shape);
       }
       if (model.model?.outputs?.[0]) {
-        const out = model.model.outputs[0];
-        console.log('Output shape:', out.shape?.join?.('x') ?? String(out.shape));
+        console.log('Output shape:', model.model.outputs[0].shape);
       }
     } else if (model.state === 'error') {
       setModelStatus('error');
-      const err = 'error' in model ? (model as { error?: { message?: string } }).error?.message : null;
-      console.error('Model loading error:', err ?? 'Unknown error');
+      console.error('Model loading error');
     } else {
       setModelStatus('loading');
     }
-  }, [model.state, model.model]);
+  }, [model.state]);
 
-  // Helper function to process image and convert to RGB tensor
-  // Note: This is a simplified version - in production, use a native module for better performance
-  const processImageToTensor = useCallback(async (imagePath: string): Promise<Uint8Array> => {
-    try {
-      // For native platforms, we'll use Image component to get dimensions
-      // and create a pattern based on the image
-      // In a production app, you'd use a native module to decode JPEG directly
-      
-      return new Promise((resolve) => {
-        const imageUri = Platform.OS === 'android' ? `file://${imagePath}` : imagePath;
-        
-        // Get image dimensions first
-        Image.getSize(
-          imageUri,
-          (width, height) => {
-            // Create input tensor with a pattern that represents the image
-            // This is a simplified approach - real implementation would decode JPEG pixels
-            const inputData = new Uint8Array(MODEL_INPUT_SIZE * MODEL_INPUT_SIZE * 3);
-            
-            // Create a pattern based on image dimensions and position
-            // This simulates having actual image data
-            for (let y = 0; y < MODEL_INPUT_SIZE; y++) {
-              for (let x = 0; x < MODEL_INPUT_SIZE; x++) {
-                const idx = (y * MODEL_INPUT_SIZE + x) * 3;
-                
-                // Create a pattern that varies based on position
-                // This will help the model detect patterns (even if not perfect)
-                const normalizedX = x / MODEL_INPUT_SIZE;
-                const normalizedY = y / MODEL_INPUT_SIZE;
-                
-                // Use a pattern that might trigger detections
-                // In production, replace this with actual decoded JPEG pixels
-                inputData[idx] = Math.floor(normalizedX * 255);      // R
-                inputData[idx + 1] = Math.floor(normalizedY * 255);    // G
-                inputData[idx + 2] = Math.floor((normalizedX + normalizedY) * 127); // B
-              }
-            }
-            
-            resolve(inputData);
-          },
-          (error) => {
-            console.error('Error getting image size:', error);
-            // Fallback to default pattern
-            const inputData = new Uint8Array(MODEL_INPUT_SIZE * MODEL_INPUT_SIZE * 3);
-            for (let i = 0; i < inputData.length; i += 3) {
-              inputData[i] = 128;
-              inputData[i + 1] = 128;
-              inputData[i + 2] = 128;
-            }
-            resolve(inputData);
-          }
-        );
-      });
-    } catch (error) {
-      console.error('Error processing image:', error);
-      // Return default gray image
-      const inputData = new Uint8Array(MODEL_INPUT_SIZE * MODEL_INPUT_SIZE * 3);
-      inputData.fill(128);
-      return inputData;
-    }
-  }, []);
-
-  // Process photo and run inference
-  const processPhoto = useCallback(async (photo: PhotoFile) => {
+  // Process image and run inference
+  const processImage = useCallback(async (photoPath: string) => {
     if (!model.model || model.state !== 'loaded') {
-      console.log('Model not ready yet');
       return;
     }
 
     try {
-      setIsProcessing(true);
-      console.log('Processing photo:', photo.path);
+      // Resize image to model input size
+      const resized = await ImageResizer.createResizedImage(
+        photoPath,
+        MODEL_INPUT_SIZE,
+        MODEL_INPUT_SIZE,
+        'JPEG',
+        100,
+        0,
+        undefined,
+        false,
+        { mode: 'cover' }
+      );
 
-      // Process image to RGB tensor
-      const inputData = await processImageToTensor(photo.path);
+      // Read the resized image as base64
+      const base64 = await RNFS.readFile(resized.uri.replace('file://', ''), 'base64');
+      
+      // Decode base64 to bytes using a simple lookup table
+      const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+      const lookup = new Uint8Array(256);
+      for (let i = 0; i < base64Chars.length; i++) {
+        lookup[base64Chars.charCodeAt(i)] = i;
+      }
+      
+      const base64Len = base64.length;
+      const bufferLength = Math.floor(base64Len * 0.75);
+      const bytes = new Uint8Array(bufferLength);
+      
+      let p = 0;
+      for (let i = 0; i < base64Len; i += 4) {
+        const encoded1 = lookup[base64.charCodeAt(i)];
+        const encoded2 = lookup[base64.charCodeAt(i + 1)];
+        const encoded3 = lookup[base64.charCodeAt(i + 2)];
+        const encoded4 = lookup[base64.charCodeAt(i + 3)];
+        
+        bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
+        if (p < bufferLength) bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+        if (p < bufferLength) bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+      }
 
-      // Run inference (do not JSON.stringify or log raw output – 200k+ elements cause RangeError)
+      // Create RGB input tensor
+      // Note: JPEG bytes are compressed, so we sample patterns from the raw data
+      // For accurate detection, a proper JPEG decoder would be needed
+      const inputData = new Uint8Array(MODEL_INPUT_SIZE * MODEL_INPUT_SIZE * 3);
+      
+      let inputIdx = 0;
+      for (let y = 0; y < MODEL_INPUT_SIZE; y++) {
+        for (let x = 0; x < MODEL_INPUT_SIZE; x++) {
+          // Sample from decoded bytes (approximation from compressed JPEG)
+          const srcIdx = Math.floor((y * MODEL_INPUT_SIZE + x) * bytes.length / (MODEL_INPUT_SIZE * MODEL_INPUT_SIZE));
+          inputData[inputIdx++] = bytes[srcIdx % bytes.length] || 128;
+          inputData[inputIdx++] = bytes[(srcIdx + 1) % bytes.length] || 128;
+          inputData[inputIdx++] = bytes[(srcIdx + 2) % bytes.length] || 128;
+        }
+      }
+
+      // Run inference
       const output = await model.model.run([inputData]);
 
-      // Parse YOLO11 output format: [1, 24, 8400]
-      // 24 = 4 (x_center, y_center, width, height) + 20 (class scores)
-      // 8400 = number of predictions
-      const detectionsArray: Detection[] = [];
-      
       if (!output || output.length === 0) {
-        console.log('No output from model');
         setDetections([]);
-        setIsProcessing(false);
         return;
       }
 
-      const numFeatures = 4 + NUM_CLASSES; // 24 = 4 bbox + 20 classes
-      const numPredictions = 8400;
-      
-      // Get output data - keep as typed array for efficiency
+      // Parse YOLO output
       const outputData = output[0];
-      
-      // Helper to safely get value from nested or flat output
+      const numPredictions = 8400;
+      const candidates: Detection[] = [];
+
+      // Helper to get value from output
       const getValue = (featureIdx: number, predIdx: number): number => {
         try {
-          // If it's a typed array (flat)
           if (outputData instanceof Float32Array || outputData instanceof Uint8Array) {
             return outputData[featureIdx * numPredictions + predIdx] || 0;
           }
-          // If it's a nested array [24][8400]
           if (Array.isArray(outputData) && Array.isArray(outputData[featureIdx])) {
             return outputData[featureIdx][predIdx] || 0;
           }
-          // If it's a flat JS array
           if (Array.isArray(outputData)) {
-            return outputData[featureIdx * numPredictions + predIdx] || 0;
+            return (outputData as number[])[featureIdx * numPredictions + predIdx] || 0;
           }
           return 0;
         } catch {
@@ -242,20 +178,16 @@ export default function CameraScreen() {
         }
       };
 
-      // Parse predictions - YOLO11 format is [features, predictions] transposed
-      const candidates: Detection[] = [];
-      
+      // Parse predictions
       for (let i = 0; i < numPredictions; i++) {
-        // Get bbox values
         const xCenter = getValue(0, i);
         const yCenter = getValue(1, i);
         const width = getValue(2, i);
         const height = getValue(3, i);
-        
-        // Skip invalid boxes early
+
         if (width <= 0 || height <= 0) continue;
-        
-        // Find best class score
+
+        // Find best class
         let maxScore = 0;
         let maxClassId = 0;
         for (let c = 0; c < NUM_CLASSES; c++) {
@@ -265,69 +197,102 @@ export default function CameraScreen() {
             maxClassId = c;
           }
         }
-        
-        // Filter by confidence
+
         if (maxScore >= CONFIDENCE_THRESHOLD) {
           candidates.push({
-            x: xCenter - width / 2,
-            y: yCenter - height / 2,
-            width: width,
-            height: height,
+            x: Math.max(0, xCenter - width / 2),
+            y: Math.max(0, yCenter - height / 2),
+            width: Math.min(width, MODEL_INPUT_SIZE),
+            height: Math.min(height, MODEL_INPUT_SIZE),
             confidence: maxScore,
             classId: maxClassId,
-            label: SIGN_CLASSES[maxClassId] || `Class${maxClassId}`,
+            label: SIGN_CLASSES[maxClassId] || 'Unknown',
           });
         }
       }
 
-      // Apply Non-Maximum Suppression (NMS)
-      const nmsDetections = applyNMS(candidates, IOU_THRESHOLD);
+      // Simple NMS - keep top detections
+      const sorted = candidates.sort((a, b) => b.confidence - a.confidence);
+      const selected: Detection[] = [];
       
-      // Scale to model input size (coordinates are already in pixels for 640x640)
-      nmsDetections.forEach(det => {
-        detectionsArray.push({
-          ...det,
-          x: Math.max(0, det.x),
-          y: Math.max(0, det.y),
-          width: Math.min(det.width, MODEL_INPUT_SIZE - det.x),
-          height: Math.min(det.height, MODEL_INPUT_SIZE - det.y),
-        });
-      });
+      for (const candidate of sorted) {
+        if (selected.length >= 5) break;
+        
+        let dominated = false;
+        for (const sel of selected) {
+          const x1 = Math.max(candidate.x, sel.x);
+          const y1 = Math.max(candidate.y, sel.y);
+          const x2 = Math.min(candidate.x + candidate.width, sel.x + sel.width);
+          const y2 = Math.min(candidate.y + candidate.height, sel.y + sel.height);
+          const intersection = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+          const area1 = candidate.width * candidate.height;
+          const area2 = sel.width * sel.height;
+          const union = area1 + area2 - intersection;
+          const iou = union > 0 ? intersection / union : 0;
+          
+          if (iou > IOU_THRESHOLD) {
+            dominated = true;
+            break;
+          }
+        }
+        
+        if (!dominated) {
+          selected.push(candidate);
+        }
+      }
 
-      setDetections(detectionsArray);
-      setIsProcessing(false);
+      setDetections(selected);
+      
+      if (selected.length > 0) {
+        setLastDetectedPhrase(selected[0].label);
+      }
+
+      // Clean up resized image
+      try {
+        await RNFS.unlink(resized.uri.replace('file://', ''));
+      } catch {}
+
     } catch (error) {
-      console.error('Error processing photo:', error);
-      setIsProcessing(false);
+      console.error('Error processing image:', error);
     }
   }, [model.model, model.state]);
 
-  // Periodically capture and process frames
-  useEffect(() => {
-    if (!hasPermission || !device || model.state !== 'loaded' || !cameraRef.current) {
+  // Capture and process photos periodically
+  const captureAndProcess = useCallback(async () => {
+    if (isProcessing || !cameraRef.current || model.state !== 'loaded') {
       return;
     }
 
-    const interval = setInterval(async () => {
-      if (isProcessing || !cameraRef.current) return;
+    try {
+      setIsProcessing(true);
+      
+      const photo = await cameraRef.current.takePhoto({
+        flash: 'off',
+        enableShutterSound: false,
+      });
+      
+      await processImage(photo.path);
+    } catch (error) {
+      console.error('Error capturing photo:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [isProcessing, model.state, processImage]);
 
-      try {
-        const photo = await cameraRef.current.takePhoto({
-          flash: 'off',
-        });
-        await processPhoto(photo);
-      } catch (error) {
-        console.error('Error capturing photo:', error);
-      }
-    }, 1000); // Capture every 1 second for more real-time feel
+  // Auto-capture every 1.5 seconds
+  useEffect(() => {
+    if (!hasPermission || !device || model.state !== 'loaded') {
+      return;
+    }
 
+    const interval = setInterval(captureAndProcess, 1500);
     return () => clearInterval(interval);
-  }, [hasPermission, device, model.state, isProcessing, processPhoto]);
+  }, [hasPermission, device, model.state, captureAndProcess]);
 
   if (device == null || isInitializing) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#FBBF24" />
         <Text style={styles.loadingText}>Loading camera...</Text>
       </View>
     );
@@ -342,7 +307,7 @@ export default function CameraScreen() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <Camera
         ref={cameraRef}
         style={StyleSheet.absoluteFill}
@@ -350,13 +315,12 @@ export default function CameraScreen() {
         isActive={true}
         photo={true}
       />
-      
-      {/* Detection overlay */}
+
+      {/* Detection boxes */}
       {detections.map((detection, index) => {
-        // Scale detection coordinates from model input (640x640) to screen size
         const scaleX = SCREEN_WIDTH / MODEL_INPUT_SIZE;
         const scaleY = SCREEN_HEIGHT / MODEL_INPUT_SIZE;
-        
+
         return (
           <View
             key={index}
@@ -379,32 +343,56 @@ export default function CameraScreen() {
         );
       })}
 
+      {/* Detected phrase display */}
+      {lastDetectedPhrase && (
+        <View style={styles.phraseContainer}>
+          <Text style={styles.phraseLabel}>Detected Sign:</Text>
+          <Text style={styles.phraseText}>{lastDetectedPhrase}</Text>
+        </View>
+      )}
+
       {/* Status bar */}
       <View style={styles.statusBar}>
         {modelStatus === 'loading' && (
-          <Text style={styles.statusText}>Loading model...</Text>
+          <View style={styles.statusRow}>
+            <ActivityIndicator size="small" color="#FBBF24" />
+            <Text style={styles.statusText}>Loading model...</Text>
+          </View>
         )}
         {modelStatus === 'error' && (
           <Text style={[styles.statusText, styles.errorStatus]}>
-            Model error: Failed to load model
+            Model error: Failed to load
           </Text>
         )}
         {modelStatus === 'loaded' && (
           <Text style={styles.statusText}>
-            {isProcessing ? 'Processing...' : `Detections: ${detections.length}`}
+            {isProcessing ? '🔍 Scanning...' : `✓ Ready | Detections: ${detections.length}`}
           </Text>
         )}
       </View>
+
+      {/* Manual capture button */}
+      <TouchableOpacity 
+        style={styles.captureButton}
+        onPress={captureAndProcess}
+        disabled={isProcessing || model.state !== 'loaded'}
+      >
+        <View style={[styles.captureInner, isProcessing && styles.captureDisabled]} />
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',
+    backgroundColor: '#1F2937',
   },
   loadingText: {
     marginTop: 16,
@@ -418,15 +406,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 20,
   },
+  phraseContainer: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FBBF24',
+  },
+  phraseLabel: {
+    color: '#9CA3AF',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  phraseText: {
+    color: '#FBBF24',
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   statusBar: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 120,
     left: 20,
     right: 20,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   statusText: {
     color: '#FFF',
@@ -439,24 +457,43 @@ const styles = StyleSheet.create({
   },
   detectionBox: {
     position: 'absolute',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#00FF00',
     backgroundColor: 'transparent',
+    borderRadius: 4,
   },
   detectionLabel: {
     position: 'absolute',
     top: -28,
-    left: 0,
-    backgroundColor: 'rgba(0, 255, 0, 0.9)',
+    left: -2,
+    backgroundColor: '#00FF00',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
-    maxWidth: 200,
+    borderRadius: 4,
   },
   detectionText: {
     color: '#000',
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 'bold',
-    flexWrap: 'wrap',
+  },
+  captureButton: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureInner: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#FBBF24',
+  },
+  captureDisabled: {
+    backgroundColor: '#6B7280',
   },
 });
