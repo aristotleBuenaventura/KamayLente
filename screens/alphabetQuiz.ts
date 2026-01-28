@@ -104,7 +104,7 @@ image: require("./alphabets/Alphabets/A.png"),
     },
     {
       id: 10,
-      image: require("./alphabets/Alphabets/J.png"),
+      image: require("./alphabets/Alphabets/J.gif"),
       choices: [
         { id: "I", label: "I" },
         { id: "J", label: "J" },
@@ -280,7 +280,7 @@ image: require("./alphabets/Alphabets/A.png"),
     },
     {
       id: 26,
-      image: require("./alphabets/Alphabets/Z.png"),
+      image: require("./alphabets/Alphabets/Z1.gif"),
       choices: [
         { id: "Y", label: "Y" },
         { id: "Z", label: "Z" },
