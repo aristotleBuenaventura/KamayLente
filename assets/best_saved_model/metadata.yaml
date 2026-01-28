@@ -1,0 +1,41 @@
+description: Ultralytics YOLO11n model trained on data.yaml
+author: Ultralytics
+date: '2026-01-29T01:24:24.615244'
+version: 8.4.8
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: Ang pangalan ko ay
+  1: Ayos lang
+  2: Congratulations
+  3: Good afternoon
+  4: Good evening
+  5: Good luck
+  6: Good morning
+  7: Good night
+  8: Happy Birthday
+  9: Hello
+  10: Ingat ka
+  11: Kamusta ka na
+  12: Mahal kita
+  13: Maraming salamat
+  14: May kapansanan ka ba sa pandinig
+  15: Nakikiramay ako
+  16: Paalam
+  17: Pasensya na
+  18: Tara kain tayo
+  19: Tara matuto ng FSL
+args:
+  batch: 1
+  fraction: 1.0
+  half: false
+  int8: false
+  nms: false
+channels: 3
+end2end: false

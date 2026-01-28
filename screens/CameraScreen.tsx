@@ -5,8 +5,33 @@ import { useTensorflowModel } from 'react-native-fast-tflite';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODEL_INPUT_SIZE = 640;
-const CONFIDENCE_THRESHOLD = 0.01; // Very low threshold to catch any detections from dummy model
-const ALPHABET_CLASSES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const CONFIDENCE_THRESHOLD = 0.25; // Confidence threshold for real model
+const IOU_THRESHOLD = 0.45; // IoU threshold for NMS
+
+// FSL (Filipino Sign Language) phrase classes - must match training data order
+const SIGN_CLASSES = [
+  'Ang pangalan ko ay',
+  'Ayos lang',
+  'Congratulations',
+  'Good afternoon',
+  'Good evening',
+  'Good luck',
+  'Good morning',
+  'Good night',
+  'Happy Birthday',
+  'Hello',
+  'Ingat ka',
+  'Kamusta ka na',
+  'Mahal kita',
+  'Maraming salamat',
+  'May kapansanan ka ba sa pandinig',
+  'Nakikiramay ako',
+  'Paalam',
+  'Pasensya na',
+  'Tara kain tayo',
+  'Tara matuto ng FSL'
+];
+const NUM_CLASSES = SIGN_CLASSES.length;
 
 interface Detection {
   x: number;
@@ -18,8 +43,46 @@ interface Detection {
   label: string;
 }
 
+// Calculate Intersection over Union (IoU) between two boxes
+function calculateIoU(box1: Detection, box2: Detection): number {
+  const x1 = Math.max(box1.x, box2.x);
+  const y1 = Math.max(box1.y, box2.y);
+  const x2 = Math.min(box1.x + box1.width, box2.x + box2.width);
+  const y2 = Math.min(box1.y + box1.height, box2.y + box2.height);
+
+  const intersection = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+  const area1 = box1.width * box1.height;
+  const area2 = box2.width * box2.height;
+  const union = area1 + area2 - intersection;
+
+  return union > 0 ? intersection / union : 0;
+}
+
+// Apply Non-Maximum Suppression to filter overlapping detections
+function applyNMS(detections: Detection[], iouThreshold: number): Detection[] {
+  if (detections.length === 0) return [];
+
+  // Sort by confidence (descending)
+  const sorted = [...detections].sort((a, b) => b.confidence - a.confidence);
+  const selected: Detection[] = [];
+
+  while (sorted.length > 0) {
+    const best = sorted.shift()!;
+    selected.push(best);
+
+    // Remove boxes with high IoU overlap
+    for (let i = sorted.length - 1; i >= 0; i--) {
+      if (calculateIoU(best, sorted[i]) > iouThreshold) {
+        sorted.splice(i, 1);
+      }
+    }
+  }
+
+  return selected;
+}
+
 export default function CameraScreen() {
-  const device = useCameraDevice('back');
+  const device = useCameraDevice('front');
   const cameraRef = useRef<Camera>(null);
   const [hasPermission, setHasPermission] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -39,33 +102,23 @@ export default function CameraScreen() {
     })();
   }, []);
 
-  // Monitor model loading status
+  // Monitor model loading status (avoid JSON.stringify of large tensors)
   useEffect(() => {
     if (model.state === 'loaded') {
       setModelStatus('loaded');
-      console.log('=== MODEL LOADED SUCCESSFULLY ===');
-      if (model.model) {
-        console.log('Model inputs:', JSON.stringify(model.model.inputs, null, 2));
-        console.log('Model outputs:', JSON.stringify(model.model.outputs, null, 2));
-        console.log('Model delegate:', model.model.delegate);
-        
-        // Log input/output shapes
-        if (model.model.inputs && model.model.inputs.length > 0) {
-          console.log('Input shape:', model.model.inputs[0].shape);
-          console.log('Input data type:', model.model.inputs[0].dataType);
-          console.log('Input name:', model.model.inputs[0].name);
-        }
-        if (model.model.outputs && model.model.outputs.length > 0) {
-          console.log('Output shape:', model.model.outputs[0].shape);
-          console.log('Output data type:', model.model.outputs[0].dataType);
-          console.log('Output name:', model.model.outputs[0].name);
-        }
+      console.log('Model loaded successfully');
+      if (model.model?.inputs?.[0]) {
+        const inp = model.model.inputs[0];
+        console.log('Input shape:', inp.shape?.join?.('x') ?? String(inp.shape));
       }
-      console.log('=== END MODEL INFO ===');
+      if (model.model?.outputs?.[0]) {
+        const out = model.model.outputs[0];
+        console.log('Output shape:', out.shape?.join?.('x') ?? String(out.shape));
+      }
     } else if (model.state === 'error') {
       setModelStatus('error');
-      const errorMessage = 'error' in model ? (model as any).error?.message : 'Unknown error';
-      console.error('Model loading error:', errorMessage);
+      const err = 'error' in model ? (model as { error?: { message?: string } }).error?.message : null;
+      console.error('Model loading error:', err ?? 'Unknown error');
     } else {
       setModelStatus('loading');
     }
@@ -147,145 +200,100 @@ export default function CameraScreen() {
       // Process image to RGB tensor
       const inputData = await processImageToTensor(photo.path);
 
-      // Run inference
-      console.log('Running inference with input shape:', [1, MODEL_INPUT_SIZE, MODEL_INPUT_SIZE, 3]);
+      // Run inference (do not JSON.stringify or log raw output – 200k+ elements cause RangeError)
       const output = await model.model.run([inputData]);
-      console.log('=== INFERENCE OUTPUT DEBUG ===');
-      console.log('Output type:', typeof output);
-      console.log('Is array:', Array.isArray(output));
-      console.log('Output length:', output?.length);
-      
-      if (output && Array.isArray(output)) {
-        console.log('Output[0] type:', typeof output[0]);
-        console.log('Output[0] is array:', Array.isArray(output[0]));
-        if (Array.isArray(output[0])) {
-          console.log('Output[0] length:', output[0].length);
-          if (output[0].length > 0) {
-            console.log('First detection:', output[0][0]);
-            console.log('First detection type:', typeof output[0][0]);
-            console.log('First detection is array:', Array.isArray(output[0][0]));
-            if (Array.isArray(output[0][0])) {
-              console.log('First detection values:', output[0][0]);
-            }
-          }
-          // Log first 5 detections
-          for (let i = 0; i < Math.min(5, output[0].length); i++) {
-            console.log(`Detection ${i}:`, output[0][i]);
-          }
-        } else {
-          console.log('Output[0] value:', output[0]);
-        }
-      } else {
-        console.log('Full output:', JSON.stringify(output).substring(0, 500));
-      }
-      console.log('=== END DEBUG ===');
 
-      // Parse detections from output
-      // YOLO models can have different output formats:
-      // Format 1: [batch, num_detections, 6] where 6 = [x_center, y_center, w, h, conf, class_id]
-      // Format 2: [batch, num_detections, 85] where 85 = [x, y, w, h, conf, 80_class_scores]
-      // Format 3: Flat array that needs reshaping
+      // Parse YOLO11 output format: [1, 24, 8400]
+      // 24 = 4 (x_center, y_center, width, height) + 20 (class scores)
+      // 8400 = number of predictions
       const detectionsArray: Detection[] = [];
       
-      if (!output || !Array.isArray(output)) {
-        console.log('Output is not an array:', typeof output);
+      if (!output || output.length === 0) {
+        console.log('No output from model');
         setDetections([]);
         setIsProcessing(false);
         return;
       }
 
-      console.log('Output structure:', {
-        length: output.length,
-        firstElementType: typeof output[0],
-        firstElementIsArray: Array.isArray(output[0]),
-      });
-
-      // Try to parse different output formats
-      let detectionData: any = null;
+      const numFeatures = 4 + NUM_CLASSES; // 24 = 4 bbox + 20 classes
+      const numPredictions = 8400;
       
-      if (output.length > 0) {
-        detectionData = output[0];
-        
-        // If it's a nested array, use it directly
-        if (Array.isArray(detectionData)) {
-          // Check if it's a 2D array (detections with features)
-          if (detectionData.length > 0 && Array.isArray(detectionData[0])) {
-            // Format: [[x, y, w, h, conf, class], ...]
-            const numDetections = Math.min(100, detectionData.length);
-            
-            for (let i = 0; i < numDetections; i++) {
-              const detection = detectionData[i];
-              
-              if (detection && Array.isArray(detection) && detection.length >= 6) {
-                // Try different coordinate formats
-                let xCenter, yCenter, width, height, confidence, classId;
-                
-                // Format: [x_center, y_center, w, h, conf, class_id] (normalized 0-1)
-                if (detection.length === 6) {
-                  xCenter = Number(detection[0]) || 0;
-                  yCenter = Number(detection[1]) || 0;
-                  width = Number(detection[2]) || 0;
-                  height = Number(detection[3]) || 0;
-                  confidence = Number(detection[4]) || 0;
-                  classId = Number(detection[5]) || 0;
-                } else {
-                  // Try to extract from longer array
-                  xCenter = Number(detection[0]) || 0;
-                  yCenter = Number(detection[1]) || 0;
-                  width = Number(detection[2]) || 0;
-                  height = Number(detection[3]) || 0;
-                  confidence = Number(detection[4]) || 0;
-                  // Find class with highest score if it's a class scores array
-                  if (detection.length > 85) {
-                    let maxScore = 0;
-                    let maxClass = 0;
-                    for (let j = 5; j < Math.min(85, detection.length); j++) {
-                      const score = Number(detection[j]) || 0;
-                      if (score > maxScore) {
-                        maxScore = score;
-                        maxClass = j - 5;
-                      }
-                    }
-                    confidence = maxScore;
-                    classId = maxClass;
-                  } else {
-                    classId = Number(detection[5]) || 0;
-                  }
-                }
-                
-                // Filter by confidence threshold
-                if (confidence > CONFIDENCE_THRESHOLD && width > 0 && height > 0) {
-                  const classIdx = Math.round(classId);
-                  if (classIdx >= 0 && classIdx < 26) {
-                    // Convert normalized coordinates (0-1) to pixel coordinates
-                    detectionsArray.push({
-                      x: (xCenter - width / 2) * MODEL_INPUT_SIZE,
-                      y: (yCenter - height / 2) * MODEL_INPUT_SIZE,
-                      width: width * MODEL_INPUT_SIZE,
-                      height: height * MODEL_INPUT_SIZE,
-                      confidence: confidence,
-                      classId: classIdx,
-                      label: ALPHABET_CLASSES[classIdx],
-                    });
-                  }
-                }
-              }
-            }
-          } else if (detectionData.length > 0 && typeof detectionData[0] === 'number') {
-            // Flat array - try to reshape it
-            // This might be [batch*detections*features] that needs reshaping
-            console.log('Flat array detected, length:', detectionData.length);
-            // For now, skip flat arrays as we need to know the exact shape
+      // Get output data - keep as typed array for efficiency
+      const outputData = output[0];
+      
+      // Helper to safely get value from nested or flat output
+      const getValue = (featureIdx: number, predIdx: number): number => {
+        try {
+          // If it's a typed array (flat)
+          if (outputData instanceof Float32Array || outputData instanceof Uint8Array) {
+            return outputData[featureIdx * numPredictions + predIdx] || 0;
           }
-        } else if (typeof detectionData === 'object' && detectionData !== null) {
-          // Try to access as typed array or tensor
-          console.log('Object output, keys:', Object.keys(detectionData));
+          // If it's a nested array [24][8400]
+          if (Array.isArray(outputData) && Array.isArray(outputData[featureIdx])) {
+            return outputData[featureIdx][predIdx] || 0;
+          }
+          // If it's a flat JS array
+          if (Array.isArray(outputData)) {
+            return outputData[featureIdx * numPredictions + predIdx] || 0;
+          }
+          return 0;
+        } catch {
+          return 0;
+        }
+      };
+
+      // Parse predictions - YOLO11 format is [features, predictions] transposed
+      const candidates: Detection[] = [];
+      
+      for (let i = 0; i < numPredictions; i++) {
+        // Get bbox values
+        const xCenter = getValue(0, i);
+        const yCenter = getValue(1, i);
+        const width = getValue(2, i);
+        const height = getValue(3, i);
+        
+        // Skip invalid boxes early
+        if (width <= 0 || height <= 0) continue;
+        
+        // Find best class score
+        let maxScore = 0;
+        let maxClassId = 0;
+        for (let c = 0; c < NUM_CLASSES; c++) {
+          const score = getValue(4 + c, i);
+          if (score > maxScore) {
+            maxScore = score;
+            maxClassId = c;
+          }
+        }
+        
+        // Filter by confidence
+        if (maxScore >= CONFIDENCE_THRESHOLD) {
+          candidates.push({
+            x: xCenter - width / 2,
+            y: yCenter - height / 2,
+            width: width,
+            height: height,
+            confidence: maxScore,
+            classId: maxClassId,
+            label: SIGN_CLASSES[maxClassId] || `Class${maxClassId}`,
+          });
         }
       }
 
-      console.log(`Parsed ${detectionsArray.length} detections from output`);
+      // Apply Non-Maximum Suppression (NMS)
+      const nmsDetections = applyNMS(candidates, IOU_THRESHOLD);
+      
+      // Scale to model input size (coordinates are already in pixels for 640x640)
+      nmsDetections.forEach(det => {
+        detectionsArray.push({
+          ...det,
+          x: Math.max(0, det.x),
+          y: Math.max(0, det.y),
+          width: Math.min(det.width, MODEL_INPUT_SIZE - det.x),
+          height: Math.min(det.height, MODEL_INPUT_SIZE - det.y),
+        });
+      });
 
-      console.log(`Found ${detectionsArray.length} detections`);
       setDetections(detectionsArray);
       setIsProcessing(false);
     } catch (error) {
@@ -437,16 +445,18 @@ const styles = StyleSheet.create({
   },
   detectionLabel: {
     position: 'absolute',
-    top: -20,
+    top: -28,
     left: 0,
-    backgroundColor: 'rgba(0, 255, 0, 0.8)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    backgroundColor: 'rgba(0, 255, 0, 0.9)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    maxWidth: 200,
   },
   detectionText: {
     color: '#000',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
+    flexWrap: 'wrap',
   },
 });
