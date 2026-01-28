@@ -116,4 +116,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // Enable animated GIF support on Android (Fresco)
+    implementation "com.facebook.fresco:fresco:3.6.0"
+    implementation "com.facebook.fresco:animated-gif:3.6.0"
 }

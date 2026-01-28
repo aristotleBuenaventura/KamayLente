@@ -24,7 +24,7 @@ The palm faces down or sideways.` },
   { letter: 'I', image: require('./alphabets/Alphabets/I.png'), text: `Raise your little finger straight up.
 Fold all other fingers into your palm.
 The palm faces forward.` },
-  { letter: 'J', image: require('./alphabets/Alphabets/J.png'), text: `Start with the hand shape for letter “I”.
+  { letter: 'J', image: { uri: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWs5eGZzOGo0b2hqemYzNmJud3E2a2cybG05MmdheW01bXByMm55MSZlcD12MV9pbnRlcm5uYWxfZ2lmX2J5X2lkJmN0PWcw/SAnVkwc1nbnwO93zpl/giphy.gif' }, text: `Start with the hand shape for letter “I”.
 Move your little finger in a curved motion to draw the letter “J” in the air.` },
   { letter: 'K', image: require('./alphabets/Alphabets/K.png'), text: `Extend your index and middle fingers upward, slightly apart.
 Place your thumb between them.

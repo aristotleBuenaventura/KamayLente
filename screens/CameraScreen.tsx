@@ -5,7 +5,7 @@ import { useTensorflowModel } from 'react-native-fast-tflite';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODEL_INPUT_SIZE = 640;
-const CONFIDENCE_THRESHOLD = 0.1; // Lower threshold to show more detections
+const CONFIDENCE_THRESHOLD = 0.01; // Very low threshold to catch any detections from dummy model
 const ALPHABET_CLASSES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 interface Detection {
@@ -28,7 +28,7 @@ export default function CameraScreen() {
   const [modelStatus, setModelStatus] = useState<string>('loading');
 
   // Load the TFLite model
-  const model = useTensorflowModel(require('../assets/yolov11_sign_language.tflite'));
+  const model = useTensorflowModel(require('../assets/model.tflite'));
 
   useEffect(() => {
     (async () => {
@@ -43,11 +43,25 @@ export default function CameraScreen() {
   useEffect(() => {
     if (model.state === 'loaded') {
       setModelStatus('loaded');
-      console.log('Model loaded successfully!');
+      console.log('=== MODEL LOADED SUCCESSFULLY ===');
       if (model.model) {
-        console.log('Model inputs:', model.model.inputs);
-        console.log('Model outputs:', model.model.outputs);
+        console.log('Model inputs:', JSON.stringify(model.model.inputs, null, 2));
+        console.log('Model outputs:', JSON.stringify(model.model.outputs, null, 2));
+        console.log('Model delegate:', model.model.delegate);
+        
+        // Log input/output shapes
+        if (model.model.inputs && model.model.inputs.length > 0) {
+          console.log('Input shape:', model.model.inputs[0].shape);
+          console.log('Input data type:', model.model.inputs[0].dataType);
+          console.log('Input name:', model.model.inputs[0].name);
+        }
+        if (model.model.outputs && model.model.outputs.length > 0) {
+          console.log('Output shape:', model.model.outputs[0].shape);
+          console.log('Output data type:', model.model.outputs[0].dataType);
+          console.log('Output name:', model.model.outputs[0].name);
+        }
       }
+      console.log('=== END MODEL INFO ===');
     } else if (model.state === 'error') {
       setModelStatus('error');
       const errorMessage = 'error' in model ? (model as any).error?.message : 'Unknown error';
@@ -136,14 +150,35 @@ export default function CameraScreen() {
       // Run inference
       console.log('Running inference with input shape:', [1, MODEL_INPUT_SIZE, MODEL_INPUT_SIZE, 3]);
       const output = await model.model.run([inputData]);
-      console.log('Inference completed. Output type:', typeof output);
+      console.log('=== INFERENCE OUTPUT DEBUG ===');
+      console.log('Output type:', typeof output);
+      console.log('Is array:', Array.isArray(output));
       console.log('Output length:', output?.length);
-      if (output && Array.isArray(output) && output.length > 0) {
-        console.log('First output shape:', Array.isArray(output[0]) ? output[0].length : 'not array');
-        if (Array.isArray(output[0]) && output[0].length > 0) {
-          console.log('Sample detection:', output[0][0]);
+      
+      if (output && Array.isArray(output)) {
+        console.log('Output[0] type:', typeof output[0]);
+        console.log('Output[0] is array:', Array.isArray(output[0]));
+        if (Array.isArray(output[0])) {
+          console.log('Output[0] length:', output[0].length);
+          if (output[0].length > 0) {
+            console.log('First detection:', output[0][0]);
+            console.log('First detection type:', typeof output[0][0]);
+            console.log('First detection is array:', Array.isArray(output[0][0]));
+            if (Array.isArray(output[0][0])) {
+              console.log('First detection values:', output[0][0]);
+            }
+          }
+          // Log first 5 detections
+          for (let i = 0; i < Math.min(5, output[0].length); i++) {
+            console.log(`Detection ${i}:`, output[0][i]);
+          }
+        } else {
+          console.log('Output[0] value:', output[0]);
         }
+      } else {
+        console.log('Full output:', JSON.stringify(output).substring(0, 500));
       }
+      console.log('=== END DEBUG ===');
 
       // Parse detections from output
       // YOLO models can have different output formats:
